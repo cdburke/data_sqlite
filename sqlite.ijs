@@ -163,7 +163,6 @@ require 'pacman'
 arg=. HTTPCMD_jpacman_
 tm=. TIMEOUT_jpacman_
 dq=. dquote_jpacman_ f.
-shell=. shellcmd_jpacman_ f.
 to=. libsqlite_psqlite_
 fm=. 'http://www.jsoftware.com/download/sqlite/',1 pick fpathname to
 lg=. jpath '~temp/getbin.log'
@@ -171,7 +170,7 @@ cmd=. arg rplc '%O';(dquote to);'%L';(dquote lg);'%t';'3';'%T';(":tm);'%U';fm
 res=. ''
 fail=. 0
 try.
-  res=. shell cmd
+  res=. shellcmd cmd
 catch. fail=. 1 end.
 if. fail +. 0 >: fsize to do.
   if. _1-:msg=. freads lg do.
