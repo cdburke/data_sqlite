@@ -109,6 +109,13 @@ else.
   rc;_1;''
 end.
 )
+shellcmd=: 3 : 0
+if. IFUNIX do.
+  hostcmd_j_ y
+else.
+  spawn_jtask_ y
+end.
+)
 splitselect=: 3 : 0
 n=. 6 + 1 i.~ ' from ' E. y
 f=. dlb n{.y

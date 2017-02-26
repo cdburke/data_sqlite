@@ -8,13 +8,14 @@ Sqlite allows direct access to sqlite databases.
 See wiki page: code.jsoftware.com/wiki/Addons/data/sqlite/Overview
 )
 
-VERSION=: '1.0.1'
+VERSION=: '1.0.2'
 
 FILES=: 0 : 0
 sqlite.ijs
 sqlitez.ijs
 sandp.ijs
 db/
+lib/
 )
 
 RELEASE=: 'j805'
