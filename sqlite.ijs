@@ -148,6 +148,9 @@ ext=. (('Darwin';'Linux') i. <UNAME) pick ;:'dylib so dll'
 libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3.',ext
 libreq=: '1.01'
 checklibrary=: 3 : 0
+if. -. IF64 do.
+  sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
+end.
 fix=. 100 * 0 ". ]
 if. -. fexist libsqlite do.
   msg=. 'The sqlite binary has not yet been installed.',LF2,'To install, '
@@ -192,21 +195,22 @@ SQLITE_OPEN_FULLMUTEX=: 16b00010000
 SQLITE_OPEN_SHAREDCACHE=: 16b00020000
 SQLITE_OPEN_PRIVATECACHE=: 16b00040000
 SQLITE_OPEN_WAL=: 16b00080000
-sqlite3_busy_timeout=: (libsqlite, ' sqlite3_busy_timeout > ',(IFWIN#'+'),' i x i' ) &cd
-sqlite3_close=: (libsqlite, ' sqlite3_close > ',(IFWIN#'+'),' i x' ) &cd
-sqlite3_errcode=: (libsqlite, ' sqlite3_errcode > ',(IFWIN#'+'),' i x' ) &cd
-sqlite3_errmsg=: (libsqlite, ' sqlite3_errmsg > ',(IFWIN#'+'),' x x' ) &cd
-sqlite3_exec=: (libsqlite, ' sqlite3_exec > ',(IFWIN#'+'),' i x *c x x *x' ) &cd
-sqlite3_extended_result_codes=: (libsqlite, ' sqlite3_extended_result_codes > ',(IFWIN#'+'),' i x i' ) &cd
-sqlite3_free=: (libsqlite, ' sqlite3_free > ',(IFWIN#'+'),' i x' ) &cd
-sqlite3_last_insert_rowid=: (libsqlite, ' sqlite3_last_insert_rowid > ',(IFWIN#'+'),' i x' ) &cd
-sqlite3_libversion=: (libsqlite, ' sqlite3_libversion > ',(IFWIN#'+'),' x' ) &cd
-sqlite3_open_v2=: (libsqlite, ' sqlite3_open_v2 > ',(IFWIN#'+'),' i *c *x i *c' ) &cd
-sqlite3_prepare_v2=: (libsqlite, ' sqlite3_prepare_v2 > ',(IFWIN#'+'),' i x *c i *x *x' ) &cd
-sqlite3_sourceid=: (libsqlite, ' sqlite3_sourceid > ',(IFWIN#'+'),' x' ) &cd
-sqlite3_extversion=: (libsqlite, ' sqlite3_extversion > ',(IFWIN#'+'),' x') &cd
-sqlite3_free_values=: (libsqlite, ' sqlite3_free_values > ',(IFWIN#'+'),' i *') &cd
-sqlite3_read_values=: (libsqlite, ' sqlite3_read_values ',(IFWIN#'+'),' i x *') &cd
+lib=. '"',libsqlite,'"'
+sqlite3_busy_timeout=: (lib, ' sqlite3_busy_timeout > ',(IFWIN#'+'),' i x i' ) &cd
+sqlite3_close=: (lib, ' sqlite3_close > ',(IFWIN#'+'),' i x' ) &cd
+sqlite3_errcode=: (lib, ' sqlite3_errcode > ',(IFWIN#'+'),' i x' ) &cd
+sqlite3_errmsg=: (lib, ' sqlite3_errmsg > ',(IFWIN#'+'),' x x' ) &cd
+sqlite3_exec=: (lib, ' sqlite3_exec > ',(IFWIN#'+'),' i x *c x x *x' ) &cd
+sqlite3_extended_result_codes=: (lib, ' sqlite3_extended_result_codes > ',(IFWIN#'+'),' i x i' ) &cd
+sqlite3_free=: (lib, ' sqlite3_free > ',(IFWIN#'+'),' i x' ) &cd
+sqlite3_last_insert_rowid=: (lib, ' sqlite3_last_insert_rowid > ',(IFWIN#'+'),' i x' ) &cd
+sqlite3_libversion=: (lib, ' sqlite3_libversion > ',(IFWIN#'+'),' x' ) &cd
+sqlite3_open_v2=: (lib, ' sqlite3_open_v2 > ',(IFWIN#'+'),' i *c *x i *c' ) &cd
+sqlite3_prepare_v2=: (lib, ' sqlite3_prepare_v2 > ',(IFWIN#'+'),' i x *c i *x *x' ) &cd
+sqlite3_sourceid=: (lib, ' sqlite3_sourceid > ',(IFWIN#'+'),' x' ) &cd
+sqlite3_extversion=: (lib, ' sqlite3_extversion > ',(IFWIN#'+'),' x') &cd
+sqlite3_free_values=: (lib, ' sqlite3_free_values > ',(IFWIN#'+'),' i *') &cd
+sqlite3_read_values=: (lib, ' sqlite3_read_values ',(IFWIN#'+'),' i x *') &cd
 sqlite_extversion=: 3 : 0
 try.
   ":0.01*sqlite3_extversion''
