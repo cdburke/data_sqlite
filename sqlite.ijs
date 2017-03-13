@@ -451,7 +451,11 @@ sqlreadsx y, (x>0) # ' limit ',(":bgn),',',":x
 )
 sqlite3=: 3 : 0
 y fwrites tmp=. }:hostcmd_j_ 'mktemp'
-r=. 2!:0 '/usr/bin/sqlite3 "',(sqlname''),'" < ',tmp
+if. IFWIN do.
+  r=. spawn_jtask_ 'sqlite3.exe "',(winpathsep sqlname''),'" < "',(winpathsep tmp),'"'
+else.
+  r=. 2!:0 '/usr/bin/sqlite3 "',(sqlname''),'" < "',tmp,'"'
+end.
 r[ferase tmp
 )
 sqlimportcsv=: 3 : 0
