@@ -147,7 +147,7 @@ xeach=: 1 : (':';'(u each x{y) x}y')
 3 : 0''
 if. UNAME-:'Android' do.
   arch=. LF-.~ 2!:0'getprop ro.product.cpu.abi'
-  libsqlite=: (jpath'~bin/../libexec/',arch,'/libjsqlite3.so')
+  libsqlite=: (jpath'~bin/../libexec/android-libs/',arch,'/libjsqlite3.so')
 else.
   ext=. (('Darwin';'Linux') i. <UNAME) pick ;:'dylib so dll'
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64+.IFRASPI)#'_32'),'.',ext
@@ -177,17 +177,25 @@ dq=. dquote_jpacman_ f.
 to=. libsqlite_psqlite_
 if. UNAME-:'Android' do.
   arch=. LF-.~ 2!:0'getprop ro.product.cpu.abi'
-  fm=. 'http://www.jsoftware.com/download/sqlite/android/libs/',arch,'/libjsqlite3.so'
-else.
-  fm=. 'http://www.jsoftware.com/download/sqlite/',(IFRASPI#'raspberry/'),1 pick fpathname to
+  fm=. 'http://www.jsoftware.com/download/sqlite/android/libs/',z=. arch,'/libjsqlite3.so'
+  'res p'=. httpget_jpacman_ fm
+  if. res do.
+    smoutput 'Connection failed: ',z return.
+  end.
+  (<to) 1!:2~ 1!:1 <p
+  2!:0 ::0: 'chmod 644 ', dquote to
+  1!:55 ::0: <p
+  smoutput 'Sqlite binary installed.'
+  return.
 end.
+fm=. 'http://www.jsoftware.com/download/sqlite/',(IFRASPI#'raspberry/'),1 pick fpathname to
 lg=. jpath '~temp/getbin.log'
 cmd=. arg rplc '%O';(dquote to);'%L';(dquote lg);'%t';'3';'%T';(":tm);'%U';fm
 res=. ''
 fail=. 0
 try.
   res=. shellcmd cmd
-  2!:0 ::0:^:((<UNAME)e.'Linux';'Android') 'chmod 644 ', dquote to
+  2!:0 ::0:^:(UNAME-:'Linux') 'chmod 644 ', dquote to
 catch. fail=. 1 end.
 if. fail +. 0 >: fsize to do.
   if. _1-:msg=. freads lg do.
