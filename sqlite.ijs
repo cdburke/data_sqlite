@@ -144,11 +144,18 @@ if. Debug do. wdinfo LastError end.
 throw.
 )
 xeach=: 1 : (':';'(u each x{y) x}y')
-ext=. (('Darwin';'Linux') i. <UNAME) pick ;:'dylib so dll'
-libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3.',ext
+3 : 0''
+if. UNAME-:'Android' do.
+  arch=. LF-.~ 2!:0'getprop ro.product.cpu.abi'
+  libsqlite=: (jpath'~bin/../libexec/',arch,'/libjsqlite3.so')
+else.
+  ext=. (('Darwin';'Linux') i. <UNAME) pick ;:'dylib so dll'
+  libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64+.IFRASPI)#'_32'),'.',ext
+end.
+)
 libreq=: '1.01'
 checklibrary=: 3 : 0
-if. -. IF64 do.
+if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
 end.
 fix=. 100 * 0 ". ]
@@ -162,18 +169,25 @@ smoutput '   getbin_psqlite_'''''
 sminfo 'Sqlite';msg
 )
 getbin=: 3 : 0
+if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do. return. end.
 require 'pacman'
 arg=. HTTPCMD_jpacman_
 tm=. TIMEOUT_jpacman_
 dq=. dquote_jpacman_ f.
 to=. libsqlite_psqlite_
-fm=. 'http://www.jsoftware.com/download/sqlite/',1 pick fpathname to
+if. UNAME-:'Android' do.
+  arch=. LF-.~ 2!:0'getprop ro.product.cpu.abi'
+  fm=. 'http://www.jsoftware.com/download/sqlite/android/libs/',arch,'/libjsqlite3.so'
+else.
+  fm=. 'http://www.jsoftware.com/download/sqlite/',(IFRASPI#'raspberry/'),1 pick fpathname to
+end.
 lg=. jpath '~temp/getbin.log'
 cmd=. arg rplc '%O';(dquote to);'%L';(dquote lg);'%t';'3';'%T';(":tm);'%U';fm
 res=. ''
 fail=. 0
 try.
   res=. shellcmd cmd
+  2!:0 ::0:^:((<UNAME)e.'Linux';'Android') 'chmod 644 ', dquote to
 catch. fail=. 1 end.
 if. fail +. 0 >: fsize to do.
   if. _1-:msg=. freads lg do.
@@ -318,6 +332,7 @@ sel=. fixselect dltb y
 if. rc do. throw '' return. end.
 'rc j res'=. sqlite3_read_values sh;,2
 assert. rc = SQLITE_DONE
+SZI=. IF64{4 8
 'buf typ nms len rws cls'=. memr res, 0 6 4
 colnames=. <;._2 memr nms,0,len
 pointers=. memr buf,0,cls,4
@@ -331,11 +346,11 @@ for_p. pointers do.
     val=. memr p,0,rws,8
   case. 3 do.
     len=. memr p, 0 1 4
-    val=. <;._2 memr p,8,len-8
+    val=. <;._2 memr p,SZI,len-SZI
   case. 4 do.
     len=. memr p, 0 1 4
-    cnt=. memr p,8,rws,4
-    pos=. 8 * rws+1
+    cnt=. memr p,SZI,rws,4
+    pos=. SZI * rws+1
     dat=. memr p,pos,len-pos
     msk=. 1 (0,+/\}:cnt)} (#dat)$0
     val=. msk <;.1 dat
