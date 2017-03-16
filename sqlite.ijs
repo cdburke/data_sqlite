@@ -360,8 +360,17 @@ for_p. pointers do.
     cnt=. memr p,SZI,rws,4
     pos=. SZI * rws+1
     dat=. memr p,pos,len-pos
-    msk=. 1 (0,+/\}:cnt)} (#dat)$0
-    val=. msk <;.1 dat
+    if. 0=#dat do.
+      val=. (#cnt)#<''
+    else.
+      if. 0 e. cnt do.
+        msk=. 1 (0,+/\}:cnt-.0)} (#dat)$0
+        val=. (cnt>0) #^:_1 msk <;.1 dat
+      else.
+        msk=. 1 (0,+/\}:cnt)} (#dat)$0
+        val=. msk <;.1 dat
+      end.
+    end.
   end.
   data=. data,<val
 end.
