@@ -68,12 +68,13 @@ elseif. do.
 end.
 )
 fixselect=: 3 : 0
-hdr=. tolower 7 {. y
-if. (<hdr) e. 'pragma ';'select ' do. y return. end.
-if. 1 e. ' from ' E. y do.
-  'select ',y return.
+sel=. dltb y
+hdr=. tolower 7 {. sel
+if. (<hdr) e. 'pragma ';'select ' do. sel return. end.
+if. 1 e. ' from ' E. sel do.
+  'select ',sel return.
 end.
-'select * from ',y
+'select * from ',sel
 )
 fixselectx=: 3 : 0
 sel=. fixselect y
@@ -335,7 +336,7 @@ r=. sort sqlexec 'name from main.sqlite_master where type="view"'
 r #~ (1 e. y E. ]) &> r
 )
 sqlread=: 3 : 0
-sel=. fixselect dltb y
+sel=. fixselect y
 'rc sh tail'=. prepare sel
 if. rc do. throw '' return. end.
 'rc j res'=. sqlite3_read_values sh;,2
@@ -378,7 +379,7 @@ sqlite3_finalize <sh
 sqlite3_free_values <res
 colnames;<data
 )
-sqlreadx=: 3 : 'sqlread fixselectx dltb y'
+sqlreadx=: 3 : 'sqlread fixselectx y'
 sqlreads=: astable @ sqlread
 sqlreadsx=: astable @ sqlreadx
 sqldict=: 3 : 0
@@ -449,8 +450,10 @@ cls;<list2mat dat
 sqltail=: 3 : 0
 10 sqltail y
 :
-bgn=. 0 >. (sqlsize y) - x
-sqlreads y, (x>0) # ' limit ',(":bgn),',',":x
+sel=. fixselect y
+tab=. 1 pick splitselect sel
+bgn=. 0 >. (sqlsize tab) - x
+sqlreads sel, (x>0) # ' limit ',(":bgn),',',":x
 )
 sqltailx=: 3 : 0
 10 sqltailx y
