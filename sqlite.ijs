@@ -83,6 +83,11 @@ if. -. 1 e. (' rowid,' E. cls) +. ' rowid ' E. cls do.
   'select rowid,',dlb 6 }. sel
 end.
 )
+getlastrows=: 3 : 0
+'len tab where'=. y
+rws=. sqlexec 'select rowid from ',tab,where
+(-len <. #rws) {. rws
+)
 list2mat=: 3 : 0
 |: > (I. 0 = L. &> y) <"0 xeach y
 )
@@ -450,16 +455,16 @@ cls;<list2mat dat
 sqltail=: 3 : 0
 10 sqltail y
 :
-sel=. fixselect y
-tab=. 1 pick splitselect sel
-bgn=. 0 >. (sqlsize tab) - x
-sqlreads sel, (x>0) # ' limit ',(":bgn),',',":x
+if. x-:0 do. sqlreads y return. end.
+'frm tab whr ord'=. splitselect fixselect y
+sqlreads frm,tab,' where rowid in ',listvalues getlastrows x;tab;whr
 )
 sqltailx=: 3 : 0
 10 sqltailx y
 :
-bgn=. 0 >. (sqlsize y) - x
-sqlreadsx y, (x>0) # ' limit ',(":bgn),',',":x
+if. x-:0 do. sqlreadx y return. end.
+'frm tab whr ord'=. splitselect fixselect y
+sqlreadx frm,tab,' where rowid in ',listvalues getlastrows x;tab;whr
 )
 sqlite3=: 3 : 0
 y fwrites tmp=. }:hostcmd_j_ 'mktemp'
