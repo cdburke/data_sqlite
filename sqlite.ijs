@@ -159,7 +159,7 @@ else.
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64+.IFRASPI)#'_32'),'.',ext
 end.
 )
-libreq=: '1.01'
+libreq=: '1.03'
 checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
@@ -362,10 +362,9 @@ for_p. pointers do.
     len=. memr p, 0 1 4
     val=. <;._2 memr p,SZI,len-SZI
   case. 4 do.
-    len=. memr p, 0 1 4
     cnt=. memr p,SZI,rws,4
     pos=. SZI * rws+1
-    dat=. memr p,pos,len-pos
+    dat=. memr p,pos,+/cnt
     if. 0=#dat do.
       val=. (#cnt)#<''
     else.
