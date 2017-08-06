@@ -156,7 +156,7 @@ if. UNAME-:'Android' do.
   libsqlite=: (jpath'~bin/../libexec/android-libs/',arch,'/libjsqlite3.so')
 else.
   ext=. (('Darwin';'Linux') i. <UNAME) pick ;:'dylib so dll'
-  libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64+.IFRASPI)#'_32'),'.',ext
+  libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
 end.
 )
 libreq=: '1.03'
