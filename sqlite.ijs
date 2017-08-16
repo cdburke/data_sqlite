@@ -8,6 +8,9 @@ create=: 3 : 0
 'file opt'=. 2 {. boxopen y
 file=. 0 pick fboxname file
 flags=. SQLITE_OPEN_FULLMUTEX,SQLITE_OPEN_WAL
+if. (;:'nowal') e. ;:opt do.
+  flags=. flags-.SQLITE_OPEN_WAL
+end.
 if. (;:'readonly') e. ;:opt do.
   flags=. flags,~SQLITE_OPEN_READONLY
 else.
