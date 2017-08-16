@@ -7,7 +7,12 @@ Timeout=: 60000
 create=: 3 : 0
 'file opt'=. 2 {. boxopen y
 file=. 0 pick fboxname file
-flags=. SQLITE_OPEN_READWRITE,SQLITE_OPEN_FULLMUTEX,SQLITE_OPEN_WAL
+flags=. SQLITE_OPEN_FULLMUTEX,SQLITE_OPEN_WAL
+if. (;:'readonly') e. ;:opt do.
+  flags=. flags,~SQLITE_OPEN_READONLY
+else.
+  flags=. flags,~SQLITE_OPEN_READWRITE
+end.
 opts=. SQLITE_OPEN_CREATE
 flags=. +/flags,opts #~ (;:'create') e. ;:opt
 handle=. ,_1
