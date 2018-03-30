@@ -208,12 +208,12 @@ cmd=. arg rplc '%O';(dquote to);'%L';(dquote lg);'%t';'3';'%T';(":tm);'%U';fm
 res=. ''
 fail=. 0
 try.
-  res=. shellcmd cmd
+  fail=. _1-: res=. shellcmd cmd
   2!:0 ::0:^:(UNAME-:'Linux') 'chmod 644 ', dquote to
 catch. fail=. 1 end.
 if. fail +. 0 >: fsize to do.
   if. _1-:msg=. freads lg do.
-    if. 0=#msg=. res do. msg=. 'Unexpected error' end. end.
+    if. (_1-:msg) +. 0=#msg=. res do. msg=. 'Unexpected error' end. end.
   ferase to,lg
   smoutput 'Connection failed: ',msg
 else.
