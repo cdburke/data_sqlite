@@ -19,10 +19,10 @@ end.
 opts=. SQLITE_OPEN_CREATE
 flags=. +/flags,opts #~ (;:'create') e. ;:opt
 handle=. ,_1
-if. SQLITE_OK ~: sqlite3_open_v2 file;handle;flags;<<0 do.
+if. SQLITE_OK ~: >@{. cdrc=. sqlite3_open_v2 file;handle;flags;<<0 do.
   throw 'unable to open database' return.
 end.
-CH=: {.handle
+CH=: {.handle=. 2{::cdrc
 sqlite3_extended_result_codes CH, 1
 sqlite3_busy_timeout CH, Timeout
 connadd CH;file;coname''
@@ -113,7 +113,8 @@ end.
 prepare=: 3 : 0
 stmt=. ,_1
 tail=. ,_1
-if. SQLITE_OK = rc=. sqlite3_prepare_v2 CH;(strlen y),stmt;tail do.
+if. SQLITE_OK = rc=. >@{. cdrc=. sqlite3_prepare_v2 CH;(strlen y),stmt;tail do.
+  'stmt tail'=. 4 5{cdrc
   if. tail e. 0 _1 do.
     rc;({.stmt);''
   else.
@@ -242,8 +243,8 @@ sqlite3_finalize=: (lib, ' sqlite3_finalize > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_free=: (lib, ' sqlite3_free > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_last_insert_rowid=: (lib, ' sqlite3_last_insert_rowid > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_libversion=: (lib, ' sqlite3_libversion > ',(IFWIN#'+'),' x' ) &cd
-sqlite3_open_v2=: (lib, ' sqlite3_open_v2 > ',(IFWIN#'+'),' i *c *x i *c' ) &cd
-sqlite3_prepare_v2=: (lib, ' sqlite3_prepare_v2 > ',(IFWIN#'+'),' i x *c i *x *x' ) &cd
+sqlite3_open_v2=: (lib, ' sqlite3_open_v2   ',(IFWIN#'+'),' i *c *x i *c' ) &cd
+sqlite3_prepare_v2=: (lib, ' sqlite3_prepare_v2   ',(IFWIN#'+'),' i x *c i *x *x' ) &cd
 sqlite3_sourceid=: (lib, ' sqlite3_sourceid > ',(IFWIN#'+'),' x' ) &cd
 sqlite3_extversion=: (lib, ' sqlite3_extversion > ',(IFWIN#'+'),' x') &cd
 sqlite3_free_values=: (lib, ' sqlite3_free_values > ',(IFWIN#'+'),' i *') &cd
