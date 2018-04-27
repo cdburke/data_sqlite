@@ -64,7 +64,21 @@ end.
 )
 
 NB. =========================================================
+NB. fix select, quoting dotted names if necessary
 fixselect=: 3 : 0
+sel=. fixselect1 y
+if. -. '.' e. sel do. return. end.
+if. 'pragma' -: 6 {. sel do. return. end.
+b=. (sel e. ' ,<>!=') > ~:/\sel='"'
+t=. (1,b) <;.1 ' ',sel
+m=. I. ('.' e. &> t) > '"' e.&> t
+if. -. 1 e. m do. sel return. end.
+dq=. {. , '"' , '"' ,~ }.
+}. ; (dq each m{t) m} t
+)
+
+NB. =========================================================
+fixselect1=: 3 : 0
 sel=. dltb y
 hdr=. tolower 7 {. sel
 if. (<hdr) e. 'pragma ';'select ' do. sel return. end.
