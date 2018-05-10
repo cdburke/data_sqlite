@@ -48,6 +48,16 @@ sqlexec 'select count(*) from sqlite_master where type="table" and name="',y,'"'
 )
 
 NB. =========================================================
+sqlfkey=: 3 : 0
+sqlreads 'pragma foreign_key_list(',y,')'
+)
+
+NB. =========================================================
+sqlindex=: 3 : 0
+sqlreads 'pragma index_list(',y,')'
+)
+
+NB. =========================================================
 sqlmeta=: 3 : 0
 sqlreads 'pragma table_info(',y,')'
 )

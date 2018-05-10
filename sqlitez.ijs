@@ -27,7 +27,9 @@ error
 exec
 execx
 exist
+fkey
 importcsv
+index
 insert
 keysum
 lastrowid

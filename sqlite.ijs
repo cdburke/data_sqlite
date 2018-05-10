@@ -325,6 +325,12 @@ end.
 sqlexist=: 3 : 0
 sqlexec 'select count(*) from sqlite_master where type="table" and name="',y,'"'
 )
+sqlfkey=: 3 : 0
+sqlreads 'pragma foreign_key_list(',y,')'
+)
+sqlindex=: 3 : 0
+sqlreads 'pragma index_list(',y,')'
+)
 sqlmeta=: 3 : 0
 sqlreads 'pragma table_info(',y,')'
 )
