@@ -1,6 +1,6 @@
 NB. sqlite zfns
 
-require 'data/sqlite'
+load 'data/sqlite'
 
 cocurrent 'z'
 

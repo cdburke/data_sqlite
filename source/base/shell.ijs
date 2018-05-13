@@ -1,18 +1,29 @@
 NB. shell commands
 NB.
 NB. For example, these enable programmatic use of dot commands
+NB. db = database filename
+NB. cmd = any sequence of sqlite3 shell commands
 
 NB. =========================================================
-NB.*shell command
-NB. cmd = any sequence of sqlite3 shell commands
-sqlite3=: 3 : 0
-y fwrites tmp=. }:hostcmd_j_ 'mktemp'
+NB.*shell commands
+sqlite3do=: 3 : 0
+'db cmd'=. y
+db=. jpath db
+cmd=. a: -.~ <;._2 cmd,LF
+cmd=. (, ';' -. {:) each cmd
+cmd=. ; cmd ,each LF
+cmd fwrites tmp=. jpath '~temp/sqlite3shell.cmd'
 if. IFWIN do.
-  r=. spawn_jtask_ 'sqlite3.exe "',(winpathsep sqlname''),'" < "',(winpathsep tmp),'"'
+  r=. spawn_jtask_ 'sqlite3.exe "',(winpathsep db),'" < "',(winpathsep tmp),'"'
 else.
-  r=. 2!:0 '/usr/bin/sqlite3 "',(sqlname''),'" < "',tmp,'"'
+  r=. 2!:0 '/usr/bin/sqlite3 "',db,'" < "',tmp,'"'
 end.
 r[ferase tmp
+)
+
+NB. =========================================================
+sqlite3=: 3 : 0
+sqlite3do (sqlname'');y
 )
 
 NB. =========================================================

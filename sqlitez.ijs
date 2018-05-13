@@ -1,4 +1,4 @@
-require 'data/sqlite'
+load 'data/sqlite'
 
 cocurrent 'z'
 dbopen=: 3 : 'empty locDB_z_=: sqlopen_psqlite_ y'

@@ -12,6 +12,7 @@ intersect=: e. # [
 isboxed=: 0 < L.
 ischar=: 2=3!:0
 isfloat=: 8=3!:0
+round=: [ * [: <. 0.5 + %~
 samesize=: 1 = #@~.@:(#&>)
 strlen=: ;#
 termLF=: , (0 < #) # LF -. {:

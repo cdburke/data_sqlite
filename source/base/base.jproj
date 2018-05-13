@@ -9,3 +9,4 @@ meta.ijs
 read.ijs
 shell.ijs
 upsert.ijs
+write.ijs

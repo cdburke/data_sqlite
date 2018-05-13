@@ -7,30 +7,35 @@ NB.-  table name
 NB.-  column names
 NB.-  column data
 NB.-i.e. tablename;(col1;col2;...);<dat1;dat2;...
-NB.-where column data is one of:
-NB.-  numeric list
-NB.-  character matrix (list treated as 1-row matrix)
-NB.-  boxed character list
-NB.-this good for relatively small inserts
 sqlinsert=: 3 : 0
 'tab nms dat'=. y
+nms=. ,each boxxopen nms
+cls=. #nms
+if. 0=cls do. 0 return. end.
+
 if. 0 e. $dat do. 0 return. end.
-if. 0 e. $nms do. nms=. sqlcols tab end.
-nms=. boxopen nms
-if. 1=#nms do.
-  if. 2=L. dat do. dat=. 0 pick dat end.
-  val=. ,. fixcol dat
-else.
-  dat=. fixcol each dat
-  if. 1 < # ~. # &> dat do.
-    throw 'data columns not same size: ',":# &> dat
-  end.
-  val=. |:> dat
+dat=. boxxopen dat
+ndx=. I. 2=3!:0 &> dat
+dat=. (<each ndx{dat) ndx} dat
+
+rws=. {. len=. # &> dat
+if. 0=rws do. 0 return. end.
+if. 0 e. rws = len do.
+  throw 'column data not of same length: ',":len return.
 end.
-sep=. '(',(<:#nms)#','
-val=. ' values ',}: ;,(sep ,each "1 val),.<'),'
-cmd=. 'insert into ',tab,' ',listvalues nms
-sqlcmd cmd,val
+
+'names types'=. sqlcolinfo tab
+if. 0 e. nms e. names do.
+  throw 'column not found:',; ' ' ,each nms -. names return.
+end.
+typ=. (names i. nms) { types
+
+sel=. }. (+:cls) $ ',?'
+sqlcmd 'begin;'
+sel=. 'insert into ',tab,' ',(listvalues nms),' values(',sel,')'
+r=. write sel;nms;typ;<dat
+sqlcmd 'commit;'
+r
 )
 
 NB. =========================================================

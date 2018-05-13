@@ -36,3 +36,4 @@ NB. sqlite extensions:
 sqlite3_extversion=: (lib, ' sqlite3_extversion > ',(IFWIN#'+'),' x') &cd
 sqlite3_free_values=: (lib, ' sqlite3_free_values > ',(IFWIN#'+'),' i *') &cd
 sqlite3_read_values=: (lib, ' sqlite3_read_values ',(IFWIN#'+'),' i x *') &cd
+sqlite3_write_values=: (lib, ' sqlite3_write_values ',(IFWIN#'+'),' i x i i *i *i *c') &cd

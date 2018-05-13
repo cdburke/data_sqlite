@@ -43,6 +43,7 @@ intersect=: e. # [
 isboxed=: 0 < L.
 ischar=: 2=3!:0
 isfloat=: 8=3!:0
+round=: [ * [: <. 0.5 + %~
 samesize=: 1 = #@~.@:(#&>)
 strlen=: ;#
 termLF=: , (0 < #) # LF -. {:
@@ -260,6 +261,7 @@ sqlite3_sourceid=: (lib, ' sqlite3_sourceid > ',(IFWIN#'+'),' x' ) &cd
 sqlite3_extversion=: (lib, ' sqlite3_extversion > ',(IFWIN#'+'),' x') &cd
 sqlite3_free_values=: (lib, ' sqlite3_free_values > ',(IFWIN#'+'),' i *') &cd
 sqlite3_read_values=: (lib, ' sqlite3_read_values ',(IFWIN#'+'),' i x *') &cd
+sqlite3_write_values=: (lib, ' sqlite3_write_values ',(IFWIN#'+'),' i x i i *i *i *c') &cd
 sqlite_extversion=: 3 : 0
 try.
   ":0.01*sqlite3_extversion''
@@ -274,23 +276,33 @@ v;s
 )
 sqlinsert=: 3 : 0
 'tab nms dat'=. y
+nms=. ,each boxxopen nms
+cls=. #nms
+if. 0=cls do. 0 return. end.
+
 if. 0 e. $dat do. 0 return. end.
-if. 0 e. $nms do. nms=. sqlcols tab end.
-nms=. boxopen nms
-if. 1=#nms do.
-  if. 2=L. dat do. dat=. 0 pick dat end.
-  val=. ,. fixcol dat
-else.
-  dat=. fixcol each dat
-  if. 1 < # ~. # &> dat do.
-    throw 'data columns not same size: ',":# &> dat
-  end.
-  val=. |:> dat
+dat=. boxxopen dat
+ndx=. I. 2=3!:0 &> dat
+dat=. (<each ndx{dat) ndx} dat
+
+rws=. {. len=. # &> dat
+if. 0=rws do. 0 return. end.
+if. 0 e. rws = len do.
+  throw 'column data not of same length: ',":len return.
 end.
-sep=. '(',(<:#nms)#','
-val=. ' values ',}: ;,(sep ,each "1 val),.<'),'
-cmd=. 'insert into ',tab,' ',listvalues nms
-sqlcmd cmd,val
+
+'names types'=. sqlcolinfo tab
+if. 0 e. nms e. names do.
+  throw 'column not found:',; ' ' ,each nms -. names return.
+end.
+typ=. (names i. nms) { types
+
+sel=. }. (+:cls) $ ',?'
+sqlcmd 'begin;'
+sel=. 'insert into ',tab,' ',(listvalues nms),' values(',sel,')'
+r=. write sel;nms;typ;<dat
+sqlcmd 'commit;'
+r
 )
 sqllastrowid=: 3 : 0
 sqlite3_last_insert_rowid CH
@@ -301,6 +313,18 @@ sqlerror=: 3 : 'LastError'
 sqlcmd=: 3 : 0
 rc=. sqlite3_exec CH;y;0;0;,0
 if. rc do. throw '' end.
+)
+sqlcolinfo=: 3 : 0
+'rc sh tail'=. prepare 'select * from ',y,' limit 0'
+if. rc do. throw '' return. end.
+'rc j res'=. sqlite3_read_values sh;,2
+assert. rc = SQLITE_DONE
+'j typ nms len j cls'=. memr res, 0 6 4
+names=. <;._2 memr nms,0,len
+types=. memr typ,0,cls,4
+sqlite3_finalize <sh
+sqlite3_free_values <res
+names;types
 )
 sqlcols=: 3 : 0
 1 pick sqlexec 'pragma table_info(',y,')'
@@ -491,14 +515,22 @@ if. x-:0 do. sqlreadx y return. end.
 'frm tab whr ord'=. splitselect fixselect y
 sqlreadx frm,tab,' where rowid in ',listvalues getlastrows x;tab;whr
 )
-sqlite3=: 3 : 0
-y fwrites tmp=. }:hostcmd_j_ 'mktemp'
+sqlite3do=: 3 : 0
+'db cmd'=. y
+db=. jpath db
+cmd=. a: -.~ <;._2 cmd,LF
+cmd=. (, ';' -. {:) each cmd
+cmd=. ; cmd ,each LF
+cmd fwrites tmp=. jpath '~temp/sqlite3shell.cmd'
 if. IFWIN do.
-  r=. spawn_jtask_ 'sqlite3.exe "',(winpathsep sqlname''),'" < "',(winpathsep tmp),'"'
+  r=. spawn_jtask_ 'sqlite3.exe "',(winpathsep db),'" < "',(winpathsep tmp),'"'
 else.
-  r=. 2!:0 '/usr/bin/sqlite3 "',(sqlname''),'" < "',tmp,'"'
+  r=. 2!:0 '/usr/bin/sqlite3 "',db,'" < "',tmp,'"'
 end.
 r[ferase tmp
+)
+sqlite3=: 3 : 0
+sqlite3do (sqlname'');y
 )
 sqlimportcsv=: 3 : 0
 'table def sep csvfile'=. y
@@ -506,24 +538,32 @@ cmd=. (termLF def),'.separator "',sep,'"',LF,'.import "',csvfile,'" ',table
 sqlite3 cmd
 )
 sqlupsert=: 3 : 0
-'tab keys cols dat'=. y
-keys=. boxopen keys
-cols=. boxopen cols
+'tab keys nms dat'=. y
+keys=. boxxopen keys
+nms=. ,each boxxopen nms
+if. 0=#keys do. throw 'upsert keys names not given' return. end.
+if. #keys -. nms do. throw 'upsert keys names not in column names' return. end.
 
 if. 0 e. $dat do. 0 return. end.
-if. 0=#keys do. throw 'upsert keys names not given' return. end.
-if. #keys -. cols do. throw 'upsert keys names not in column names' return. end.
-if. 1=#cols do.
-  if. ischar dat do.
-    dat=. <dtb each <"1 dat
-  else.
-    dat=. boxopen dat
-  end.
+dat=. boxxopen dat
+ndx=. I. 2=3!:0 &> dat
+dat=. (<each ndx{dat) ndx} dat
+
+rws=. {. len=. # &> dat
+if. 0=rws do. 0 return. end.
+if. 0 e. rws = len do.
+  throw 'column data not of same length: ',":len return.
 end.
+
+'names types'=. sqlcolinfo tab
+if. 0 e. nms e. names do.
+  throw 'column not found:',; ' ' ,each nms -. names return.
+end.
+typ=. (names i. nms) { types
 
 sel=. ''
 for_key. keys do.
-  ndx=. cols i. key
+  ndx=. nms i. key
   sel=. sel,' AND ',(>key),' in ',listvalues ~.ndx pick dat
 end.
 old=. sqlexec ('rowid,',commasep keys),' from ',tab,' where ',5 }.sel
@@ -531,30 +571,59 @@ row=. 0 pick old
 if. 0=#row do. sqlinsert 0 2 3{y return. end.
 
 old=. }.old
-new=. (cols i. keys) { dat
+new=. (nms i. keys) { dat
 ind=. old boxindexof new
 
 msk=. ind=#row
 if. 1 e. msk do.
-  sqlinsert tab;cols;<msk&# each dat
+  sqlinsert tab;nms;<msk&# each dat
   if. -. 0 e. msk do. return. end.
   ind=. (-.msk)#ind
   dat=. (-.msk)&# each dat
 end.
 row=. ind{row
 
-old=. sqlexec 'rowid,',(commasep cols),' from ',tab,' where rowid in ',listvalues row
+old=. sqlexec 'rowid,',(commasep nms),' from ',tab,' where rowid in ',listvalues row
 msk=. -. dat boxmember }.old
 if. -. 1 e. msk do. 0 return. end.
 
 row=. msk#row
 dat=. msk&# each dat
-dat=. |: fixcol &> dat
+cls=. #nms
 
-cmd=. <@}.@;"1 (',' ,each cols ,each '=') ,each "1 dat
-cmd=. ('update ',tab,' set ')&, each cmd
-cmd=. ;cmd ,each (' where rowid=', ';',~ ":) each row
-sqlcmd 'begin;',cmd,'commit;'
+cmd=. 'update ',tab,' set ', (}: ; nms ,each <'=?,'),' where rowid='
+sqlcmd 'begin;'
+for_r. row do.
+  write (cmd,":r);nms;typ;<r_index {each dat
+end.
+sqlcmd 'commit;'
+#row
+)
+write=: 3 : 0
+'sel nms typ dat'=. y
+rws=. #0 pick dat
+val=. typ fixwrite each dat
+if. (<0) e. val do.
+  throw 'invalid data for',;' ' ,each nms #~ (<0)=val return.
+end.
+'rc sh tail'=. prepare sel
+if. rc do. throw '' return. end.
+sqlite3_write_values sh;rws;(#typ);typ;(#&>val);;val
+sqlite3_finalize <sh
+rws
+)
+fixwrite=: 4 : 0
+if. (x=0) +. 1 < #$y do. 0 return. end.
+t=. 3!:0 y
+if. x=1 do.
+  if. t e. 1 4 do. (2+IF64) (3!:4) y else. 0 end. return.
+end.
+if. x=2 do.
+  if. t e. 1 4 8 do. 2 (3!:5) y else. 0 end. return.
+end.
+if. t ~: 32 do. 0 return. end.
+if. 0 e. 2 = 3!:0 &> y do. 0 return. end.
+if. x=3 do. ; y ,each {.a. else. (2 (3!:4) # &> y),;y end.
 )
 checklibrary$0
 cocurrent 'base'

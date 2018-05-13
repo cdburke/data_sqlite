@@ -1,6 +1,6 @@
 NB. buildsandp database
 
-require 'data/sqlite'
+load 'data/sqlite'
 
 NB. =========================================================
 NB. build sandp database, returning locale
