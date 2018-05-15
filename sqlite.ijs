@@ -180,7 +180,7 @@ else.
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
 end.
 )
-libreq=: '1.03'
+libreq=: '1.04'
 checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
@@ -198,13 +198,14 @@ sminfo 'Sqlite';msg
 getbin=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do. return. end.
 require 'pacman'
+path=. 'http://www.jsoftware.com/download/sqlitebin/',(":100 * 0 ". libreq),'/'
 arg=. HTTPCMD_jpacman_
 tm=. TIMEOUT_jpacman_
 dq=. dquote_jpacman_ f.
 to=. libsqlite_psqlite_
 if. UNAME-:'Android' do.
   arch=. LF-.~ 2!:0'getprop ro.product.cpu.abi'
-  fm=. 'http://www.jsoftware.com/download/sqlite/android/libs/',z=. arch,'/libjsqlite3.so'
+  fm=. path,'android/libs/',z=. arch,'/libjsqlite3.so'
   'res p'=. httpget_jpacman_ fm
   if. res do.
     smoutput 'Connection failed: ',z return.
@@ -215,7 +216,7 @@ if. UNAME-:'Android' do.
   smoutput 'Sqlite binary installed.'
   return.
 end.
-fm=. 'http://www.jsoftware.com/download/sqlite/',(IFRASPI#'raspberry/'),1 pick fpathname to
+fm=. path,(IFRASPI#'raspberry/'),1 pick fpathname to
 lg=. jpath '~temp/getbin.log'
 cmd=. arg rplc '%O';(dquote to);'%L';(dquote lg);'%t';'3';'%T';(":tm);'%U';fm
 res=. ''
