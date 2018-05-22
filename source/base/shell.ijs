@@ -10,7 +10,9 @@ sqlite3do=: 3 : 0
 'db cmd'=. y
 db=. jpath db
 cmd=. a: -.~ <;._2 cmd,LF
-cmd=. (, ';' -. {:) each cmd
+ndx=. I. '.' ~: {. &> cmd
+f=. , ';' -. {:
+cmd=. (f each ndx{cmd) ndx} cmd
 cmd=. ; cmd ,each LF
 cmd fwrites tmp=. jpath '~temp/sqlite3shell.cmd'
 if. IFWIN do.

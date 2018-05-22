@@ -4,6 +4,9 @@ DBS=: i.0 3
 Debug=: 0
 LastError=: ''
 Timeout=: 60000
+NullInt=: <.-2^<:32*1+IF64
+NullFloat=: __
+NullText=: 'NULL'
 create=: 3 : 0
 'file opt'=. 2 {. boxopen y
 file=. 0 pick fboxname file
@@ -19,7 +22,8 @@ end.
 opts=. SQLITE_OPEN_CREATE
 flags=. +/flags,opts #~ (;:'create') e. ;:opt
 handle=. ,_1
-if. SQLITE_OK ~: >@{. cdrc=. sqlite3_open_v2 file;handle;flags;<<0 do.
+nul=. NullInt;NullFloat;NullText
+if. SQLITE_OK ~: >@{. cdrc=. sqlite3_extopen AA__=: file;handle;flags;nul,<<0 do.
   throw 'unable to open database' return.
 end.
 CH=: {.handle=. 2{::cdrc
@@ -180,7 +184,7 @@ else.
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
 end.
 )
-libreq=: '1.04'
+libreq=: '1.05'
 checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
@@ -256,9 +260,9 @@ sqlite3_finalize=: (lib, ' sqlite3_finalize > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_free=: (lib, ' sqlite3_free > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_last_insert_rowid=: (lib, ' sqlite3_last_insert_rowid > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_libversion=: (lib, ' sqlite3_libversion > ',(IFWIN#'+'),' x' ) &cd
-sqlite3_open_v2=: (lib, ' sqlite3_open_v2   ',(IFWIN#'+'),' i *c *x i *c' ) &cd
 sqlite3_prepare_v2=: (lib, ' sqlite3_prepare_v2   ',(IFWIN#'+'),' i x *c i *x *x' ) &cd
 sqlite3_sourceid=: (lib, ' sqlite3_sourceid > ',(IFWIN#'+'),' x' ) &cd
+sqlite3_extopen=: (lib, ' sqlite3_extopen ',(IFWIN#'+'),' i *c *x i x d *c *c' ) &cd
 sqlite3_extversion=: (lib, ' sqlite3_extversion > ',(IFWIN#'+'),' x') &cd
 sqlite3_free_values=: (lib, ' sqlite3_free_values > ',(IFWIN#'+'),' i *') &cd
 sqlite3_read_values=: (lib, ' sqlite3_read_values ',(IFWIN#'+'),' i x *') &cd
@@ -520,7 +524,9 @@ sqlite3do=: 3 : 0
 'db cmd'=. y
 db=. jpath db
 cmd=. a: -.~ <;._2 cmd,LF
-cmd=. (, ';' -. {:) each cmd
+ndx=. I. '.' ~: {. &> cmd
+f=. , ';' -. {:
+cmd=. (f each ndx{cmd) ndx} cmd
 cmd=. ; cmd ,each LF
 cmd fwrites tmp=. jpath '~temp/sqlite3shell.cmd'
 if. IFWIN do.

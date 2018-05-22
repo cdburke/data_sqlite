@@ -7,6 +7,7 @@ NB.-  table name
 NB.-  column names
 NB.-  column data
 NB.-i.e. tablename;(col1;col2;...);<dat1;dat2;...
+NB.-returns record count inserted
 sqlinsert=: 3 : 0
 'tab nms dat'=. y
 nms=. ,each boxxopen nms

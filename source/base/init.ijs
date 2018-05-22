@@ -9,6 +9,11 @@ Debug=: 0
 LastError=: ''
 Timeout=: 60000
 
+NB. default nulls for read/write (text also used for blob):
+NullInt=: <.-2^<:32*1+IF64
+NullFloat=: __
+NullText=: 'NULL'
+
 NB. =========================================================
 NB. create v
 NB. argument is filename [;options]
@@ -28,7 +33,8 @@ end.
 opts=. SQLITE_OPEN_CREATE
 flags=. +/flags,opts #~ (;:'create') e. ;:opt
 handle=. ,_1
-if. SQLITE_OK ~: >@{. cdrc=. sqlite3_open_v2 file;handle;flags;<<0 do.
+nul=. NullInt;NullFloat;NullText
+if. SQLITE_OK ~: >@{. cdrc=. sqlite3_extopen AA__=: file;handle;flags;nul,<<0 do.
   throw 'unable to open database' return.
 end.
 CH=: {.handle=. 2{::cdrc
