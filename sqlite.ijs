@@ -280,31 +280,11 @@ s=. memr (sqlite3_sourceid''),0 _1
 v;s
 )
 sqlinsert=: 3 : 0
-'tab nms dat'=. y
-nms=. ,each boxxopen nms
-cls=. #nms
-if. 0=cls do. 0 return. end.
-
-if. 0 e. $dat do. 0 return. end.
-dat=. boxxopen dat
-ndx=. I. 2=3!:0 &> dat
-dat=. (<each ndx{dat) ndx} dat
-
-rws=. {. len=. # &> dat
-if. 0=rws do. 0 return. end.
-if. 0 e. rws = len do.
-  throw 'column data not of same length: ',":len return.
-end.
-
-'names types'=. sqlcolinfo tab
-if. 0 e. nms e. names do.
-  throw 'column not found:',; ' ' ,each nms -. names return.
-end.
-typ=. (names i. nms) { types
-
-sel=. }. (+:cls) $ ',?'
-sqlcmd 'begin;'
+if. 0 -: args=. writeargs y do. 0 return. end.
+'tab typ nms dat'=. args
+sel=. }. (+:#nms) $ ',?'
 sel=. 'insert into ',tab,' ',(listvalues nms),' values(',sel,')'
+sqlcmd 'begin;'
 r=. write sel;nms;typ;<dat
 sqlcmd 'commit;'
 r
@@ -544,6 +524,18 @@ sqlimportcsv=: 3 : 0
 cmd=. (termLF def),'.separator "',sep,'"',LF,'.import "',csvfile,'" ',table
 sqlite3 cmd
 )
+sqlupdate=: 3 : 0
+'tab whr nms dat'=. y
+if. 0 -: args=. writeargs tab;nms;<dat do. 0 return. end.
+'tab typ nms dat'=. args
+whr=. ('where ' #~ -.'where ' -: 6 {. whr),whr
+set=. }:;nms ,each <'=?,'
+sel=. 'update ',tab,' set ',set,' ',whr
+sqlcmd 'begin;'
+r=. write sel;nms;typ;<dat
+sqlcmd 'commit;'
+r
+)
 sqlupsert=: 3 : 0
 'tab keys nms dat'=. y
 keys=. boxxopen keys
@@ -551,22 +543,8 @@ nms=. ,each boxxopen nms
 if. 0=#keys do. throw 'upsert keys names not given' return. end.
 if. #keys -. nms do. throw 'upsert keys names not in column names' return. end.
 
-if. 0 e. $dat do. 0 return. end.
-dat=. boxxopen dat
-ndx=. I. 2=3!:0 &> dat
-dat=. (<each ndx{dat) ndx} dat
-
-rws=. {. len=. # &> dat
-if. 0=rws do. 0 return. end.
-if. 0 e. rws = len do.
-  throw 'column data not of same length: ',":len return.
-end.
-
-'names types'=. sqlcolinfo tab
-if. 0 e. nms e. names do.
-  throw 'column not found:',; ' ' ,each nms -. names return.
-end.
-typ=. (names i. nms) { types
+if. 0 -: args=. writeargs tab;nms;<dat do. 0 return. end.
+'tab typ nms dat'=. args
 
 sel=. ''
 for_key. keys do.
@@ -618,6 +596,30 @@ if. rc do. throw '' return. end.
 sqlite3_write_values sh;rws;(#typ);typ;(#&>val);;val
 sqlite3_finalize <sh
 rws
+)
+writeargs=: 3 : 0
+'tab nms dat'=. y
+nms=. ,each boxxopen nms
+cls=. #nms
+if. 0=cls do. 0 return. end.
+
+if. 0 e. $dat do. 0 return. end.
+dat=. boxxopen dat
+ndx=. I. 2=3!:0 &> dat
+dat=. (<each ndx{dat) ndx} dat
+
+rws=. {. len=. # &> dat
+if. 0=rws do. 0 return. end.
+if. 0 e. rws = len do.
+  throw 'column data not of same length: ',":len return.
+end.
+
+'names types'=. sqlcolinfo tab
+if. 0 e. nms e. names do.
+  throw 'column not found:',; ' ' ,each nms -. names return.
+end.
+typ=. (names i. nms) { types
+tab;typ;nms;<dat
 )
 fixwrite=: 4 : 0
 if. (x=0) +. 1 < #$y do. 0 return. end.

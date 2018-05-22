@@ -18,22 +18,8 @@ nms=. ,each boxxopen nms
 if. 0=#keys do. throw 'upsert keys names not given' return. end.
 if. #keys -. nms do. throw 'upsert keys names not in column names' return. end.
 
-if. 0 e. $dat do. 0 return. end.
-dat=. boxxopen dat
-ndx=. I. 2=3!:0 &> dat
-dat=. (<each ndx{dat) ndx} dat
-
-rws=. {. len=. # &> dat
-if. 0=rws do. 0 return. end.
-if. 0 e. rws = len do.
-  throw 'column data not of same length: ',":len return.
-end.
-
-'names types'=. sqlcolinfo tab
-if. 0 e. nms e. names do.
-  throw 'column not found:',; ' ' ,each nms -. names return.
-end.
-typ=. (names i. nms) { types
+if. 0 -: args=. writeargs tab;nms;<dat do. 0 return. end.
+'tab typ nms dat'=. args
 
 sel=. ''
 for_key. keys do.

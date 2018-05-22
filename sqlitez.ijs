@@ -43,6 +43,7 @@ readsx
 schema
 size
 tables
+update
 upsert
 views
 )

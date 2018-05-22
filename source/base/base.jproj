@@ -8,5 +8,6 @@ insert.ijs
 meta.ijs
 read.ijs
 shell.ijs
+update.ijs
 upsert.ijs
 write.ijs

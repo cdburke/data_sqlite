@@ -1,10 +1,10 @@
 
 load 'data/sqlite'
-sqlite_extversion_psqlite_''
-sqlite_info_psqlite_''
 
 NB. =========================================================
 Note''
+sqlite_extversion_psqlite_''
+sqlite_info_psqlite_''
 db=: sqlopen_psqlite_ '~addons/data/sqlite/db/sandp.db'
 smoutput sqlreads__db 'p'
 db=: sqlopen_psqlite_ '~addons/data/sqlite/db/chinook.db'

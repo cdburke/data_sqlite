@@ -1,4 +1,4 @@
-NB. buildsandp database
+NB. build sandp database
 
 load 'data/sqlite'
 
