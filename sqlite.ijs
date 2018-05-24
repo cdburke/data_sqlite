@@ -4,9 +4,13 @@ DBS=: i.0 3
 Debug=: 0
 LastError=: ''
 Timeout=: 60000
-NullInt=: <.-2^<:32*1+IF64
-NullFloat=: __
-NullText=: 'NULL'
+SQLITE_INTEGER=: 1
+SQLITE_FLOAT=: 2
+SQLITE_TEXT=: 3
+SQLITE_BLOB=: 4
+SQLITE_NULL_INTEGER=: <.-2^<:32*1+IF64
+SQLITE_NULL_FLOAT=: __
+SQLITE_NULL_TEXT=: 'NULL'
 create=: 3 : 0
 'file opt'=. 2 {. boxopen y
 file=. 0 pick fboxname file
@@ -22,8 +26,8 @@ end.
 opts=. SQLITE_OPEN_CREATE
 flags=. +/flags,opts #~ (;:'create') e. ;:opt
 handle=. ,_1
-nul=. NullInt;NullFloat;NullText
-if. SQLITE_OK ~: >@{. cdrc=. sqlite3_extopen AA__=: file;handle;flags;nul,<<0 do.
+nul=. SQLITE_NULL_INTEGER;SQLITE_NULL_FLOAT;SQLITE_NULL_TEXT
+if. SQLITE_OK ~: >@{. cdrc=. sqlite3_extopen file;handle;flags;nul,<<0 do.
   throw 'unable to open database' return.
 end.
 CH=: {.handle=. 2{::cdrc
@@ -264,9 +268,9 @@ sqlite3_prepare_v2=: (lib, ' sqlite3_prepare_v2   ',(IFWIN#'+'),' i x *c i *x *x
 sqlite3_sourceid=: (lib, ' sqlite3_sourceid > ',(IFWIN#'+'),' x' ) &cd
 sqlite3_extopen=: (lib, ' sqlite3_extopen ',(IFWIN#'+'),' i *c *x i x d *c *c' ) &cd
 sqlite3_extversion=: (lib, ' sqlite3_extversion > ',(IFWIN#'+'),' x') &cd
+sqlite3_exec_values=: (lib, ' sqlite3_exec_values ',(IFWIN#'+'),' i x i i *i *i *c') &cd
 sqlite3_free_values=: (lib, ' sqlite3_free_values > ',(IFWIN#'+'),' i *') &cd
 sqlite3_read_values=: (lib, ' sqlite3_read_values ',(IFWIN#'+'),' i x *') &cd
-sqlite3_write_values=: (lib, ' sqlite3_write_values ',(IFWIN#'+'),' i x i i *i *i *c') &cd
 sqlite_extversion=: 3 : 0
 try.
   ":0.01*sqlite3_extversion''
@@ -281,11 +285,11 @@ v;s
 )
 sqlinsert=: 3 : 0
 if. 0 -: args=. writeargs y do. 0 return. end.
-'tab typ nms dat'=. args
+'tab nms typ dat'=. args
 sel=. }. (+:#nms) $ ',?'
 sel=. 'insert into ',tab,' ',(listvalues nms),' values(',sel,')'
 sqlcmd 'begin;'
-r=. write sel;nms;typ;<dat
+r=. execparm sel;nms;typ;<dat
 sqlcmd 'commit;'
 r
 )
@@ -374,6 +378,71 @@ sort r #~ (1 e. y E. ]) &> r
 sqlviews=: 3 : 0
 r=. sort sqlexec 'name from main.sqlite_master where type="view"'
 r #~ (1 e. y E. ]) &> r
+)
+sqlparm=: 3 : 0
+'sel typ dat'=. y
+nms=. ('item',":) each i.#typ
+'nms dat'=. parmargs nms;<dat
+execparm sel;nms;typ;<dat
+)
+execparm=: 3 : 0
+'sel nms typ dat'=. y
+rws=. #0 pick dat
+val=. typ fixparm each dat
+if. (<0) e. val do.
+  throw 'invalid data for',;' ' ,each nms #~ (<0)=val return.
+end.
+'rc sh tail'=. prepare sel
+if. rc do. throw '' return. end.
+sqlite3_exec_values sh;rws;(#typ);typ;(#&>val);;val
+sqlite3_finalize <sh
+rws
+)
+fixparm=: 4 : 0
+if. (x=0) +. 1 < #$y do. 0 return. end.
+t=. 3!:0 y
+if. x=1 do.
+  if. t e. 1 4 do. (2+IF64) (3!:4) y else. 0 end. return.
+end.
+if. x=2 do.
+  if. t e. 1 4 8 do. 2 (3!:5) y else. 0 end. return.
+end.
+if. t ~: 32 do. 0 return. end.
+if. 0 e. 2 = 3!:0 &> y do. 0 return. end.
+if. x=3 do. ; y ,each {.a. else. (2 (3!:4) # &> y),;y end.
+)
+parmargs=: 3 : 0
+'nms dat'=. y
+
+nms=. ,each boxxopen nms
+if. 0=#nms do. 0 return. end.
+
+if. 0 e. $dat do. 0 return. end.
+dat=. boxxopen dat
+ndx=. I. 2=3!:0 &> dat
+dat=. (<each ndx{dat) ndx} dat
+
+rws=. {. len=. # &> dat
+if. 0=rws do. 0 return. end.
+if. 0 e. rws = len do.
+  throw 'column data not of same length: ',":len return.
+end.
+
+nms;<dat
+)
+writeargs=: 3 : 0
+'tab nms dat'=. y
+
+if. 0=args=. parmargs nms;<dat do. 0 return. end.
+'nms dat'=. args
+
+'names types'=. sqlcolinfo tab
+if. 0 e. nms e. names do.
+  throw 'column not found:',; ' ' ,each nms -. names return.
+end.
+typ=. (names i. nms) { types
+
+tab;nms;typ;<dat
 )
 sqlread=: 3 : 0
 sel=. fixselect y
@@ -527,12 +596,12 @@ sqlite3 cmd
 sqlupdate=: 3 : 0
 'tab whr nms dat'=. y
 if. 0 -: args=. writeargs tab;nms;<dat do. 0 return. end.
-'tab typ nms dat'=. args
+'tab nms typ dat'=. args
 whr=. ('where ' #~ -.'where ' -: 6 {. whr),whr
 set=. }:;nms ,each <'=?,'
 sel=. 'update ',tab,' set ',set,' ',whr
 sqlcmd 'begin;'
-r=. write sel;nms;typ;<dat
+r=. execparm sel;nms;typ;<dat
 sqlcmd 'commit;'
 r
 )
@@ -544,7 +613,7 @@ if. 0=#keys do. throw 'upsert keys names not given' return. end.
 if. #keys -. nms do. throw 'upsert keys names not in column names' return. end.
 
 if. 0 -: args=. writeargs tab;nms;<dat do. 0 return. end.
-'tab typ nms dat'=. args
+'tab nms typ dat'=. args
 
 sel=. ''
 for_key. keys do.
@@ -579,60 +648,10 @@ cls=. #nms
 cmd=. 'update ',tab,' set ', (}: ; nms ,each <'=?,'),' where rowid='
 sqlcmd 'begin;'
 for_r. row do.
-  write (cmd,":r);nms;typ;<r_index {each dat
+  execparm (cmd,":r);nms;typ;<r_index {each dat
 end.
 sqlcmd 'commit;'
 #row
-)
-write=: 3 : 0
-'sel nms typ dat'=. y
-rws=. #0 pick dat
-val=. typ fixwrite each dat
-if. (<0) e. val do.
-  throw 'invalid data for',;' ' ,each nms #~ (<0)=val return.
-end.
-'rc sh tail'=. prepare sel
-if. rc do. throw '' return. end.
-sqlite3_write_values sh;rws;(#typ);typ;(#&>val);;val
-sqlite3_finalize <sh
-rws
-)
-writeargs=: 3 : 0
-'tab nms dat'=. y
-nms=. ,each boxxopen nms
-cls=. #nms
-if. 0=cls do. 0 return. end.
-
-if. 0 e. $dat do. 0 return. end.
-dat=. boxxopen dat
-ndx=. I. 2=3!:0 &> dat
-dat=. (<each ndx{dat) ndx} dat
-
-rws=. {. len=. # &> dat
-if. 0=rws do. 0 return. end.
-if. 0 e. rws = len do.
-  throw 'column data not of same length: ',":len return.
-end.
-
-'names types'=. sqlcolinfo tab
-if. 0 e. nms e. names do.
-  throw 'column not found:',; ' ' ,each nms -. names return.
-end.
-typ=. (names i. nms) { types
-tab;typ;nms;<dat
-)
-fixwrite=: 4 : 0
-if. (x=0) +. 1 < #$y do. 0 return. end.
-t=. 3!:0 y
-if. x=1 do.
-  if. t e. 1 4 do. (2+IF64) (3!:4) y else. 0 end. return.
-end.
-if. x=2 do.
-  if. t e. 1 4 8 do. 2 (3!:5) y else. 0 end. return.
-end.
-if. t ~: 32 do. 0 return. end.
-if. 0 e. 2 = 3!:0 &> y do. 0 return. end.
-if. x=3 do. ; y ,each {.a. else. (2 (3!:4) # &> y),;y end.
 )
 checklibrary$0
 cocurrent 'base'

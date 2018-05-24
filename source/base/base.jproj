@@ -6,8 +6,8 @@ api.ijs
 info.ijs
 insert.ijs
 meta.ijs
+parm.ijs
 read.ijs
 shell.ijs
 update.ijs
 upsert.ijs
-write.ijs

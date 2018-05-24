@@ -59,4 +59,6 @@ randx
 tail
 tailx
 )
+a=. 'SQLITE_'&, each ;:'INTEGER FLOAT TEXT BLOB'
+". &> a ,each '_z_=: '&, each a ,each <'_psqlite_'
 cocurrent 'base'

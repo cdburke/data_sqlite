@@ -19,7 +19,7 @@ if. 0=#keys do. throw 'upsert keys names not given' return. end.
 if. #keys -. nms do. throw 'upsert keys names not in column names' return. end.
 
 if. 0 -: args=. writeargs tab;nms;<dat do. 0 return. end.
-'tab typ nms dat'=. args
+'tab nms typ dat'=. args
 
 sel=. ''
 for_key. keys do.
@@ -54,7 +54,7 @@ cls=. #nms
 cmd=. 'update ',tab,' set ', (}: ; nms ,each <'=?,'),' where rowid='
 sqlcmd 'begin;'
 for_r. row do.
-  write (cmd,":r);nms;typ;<r_index {each dat
+  execparm (cmd,":r);nms;typ;<r_index {each dat
 end.
 sqlcmd 'commit;'
 #row

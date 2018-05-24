@@ -10,11 +10,11 @@ NB.-i.e. tablename;(col1;col2;...);<dat1;dat2;...
 NB.-returns record count inserted
 sqlinsert=: 3 : 0
 if. 0 -: args=. writeargs y do. 0 return. end.
-'tab typ nms dat'=. args
+'tab nms typ dat'=. args
 sel=. }. (+:#nms) $ ',?'
 sel=. 'insert into ',tab,' ',(listvalues nms),' values(',sel,')'
 sqlcmd 'begin;'
-r=. write sel;nms;typ;<dat
+r=. execparm sel;nms;typ;<dat
 sqlcmd 'commit;'
 r
 )

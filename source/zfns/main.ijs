@@ -80,5 +80,10 @@ tail
 tailx
 )
 
+NB. ---------------------------------------------------------
+NB. nouns
+a=. 'SQLITE_'&, each ;:'INTEGER FLOAT TEXT BLOB'
+". &> a ,each '_z_=: '&, each a ,each <'_psqlite_'
+
 NB. =========================================================
 cocurrent 'base'
