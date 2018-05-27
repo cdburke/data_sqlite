@@ -7,7 +7,12 @@ sqlread=: 3 : 0
 sel=. fixselect y
 'rc sh tail'=. prepare sel
 if. rc do. throw '' return. end.
-'rc j res'=. sqlite3_read_values sh;,2
+readvalues sqlite3_read_values sh;,2
+)
+
+NB. =========================================================
+readvalues=: 3 : 0
+'rc sh res'=. 3 {. y
 assert. rc = SQLITE_DONE
 SZI=. IF64{4 8
 'buf typ nms len rws cls'=. memr res, 0 6 4

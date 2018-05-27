@@ -188,7 +188,7 @@ else.
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
 end.
 )
-libreq=: '1.05'
+libreq=: '1.06'
 checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
@@ -271,6 +271,7 @@ sqlite3_extversion=: (lib, ' sqlite3_extversion > ',(IFWIN#'+'),' x') &cd
 sqlite3_exec_values=: (lib, ' sqlite3_exec_values ',(IFWIN#'+'),' i x i i *i *i *c') &cd
 sqlite3_free_values=: (lib, ' sqlite3_free_values > ',(IFWIN#'+'),' i *') &cd
 sqlite3_read_values=: (lib, ' sqlite3_read_values ',(IFWIN#'+'),' i x *') &cd
+sqlite3_select_values=: (lib, ' sqlite3_select_values ',(IFWIN#'+'),' i x * i *i *i *c') &cd
 sqlite_extversion=: 3 : 0
 try.
   ":0.01*sqlite3_extversion''
@@ -380,7 +381,13 @@ r=. sort sqlexec 'name from main.sqlite_master where type="view"'
 r #~ (1 e. y E. ]) &> r
 )
 sqlparm=: 3 : 0
-'sel typ dat'=. y
+if. 2=#y do.
+  'sel dat'=. y
+  typ=. parmtype &> boxxopen dat
+else.
+  'sel typ dat'=. y
+end.
+typ=. ,typ
 nms=. ('item',":) each i.#typ
 'nms dat'=. parmargs nms;<dat
 execparm sel;nms;typ;<dat
@@ -392,11 +399,14 @@ val=. typ fixparm each dat
 if. (<0) e. val do.
   throw 'invalid data for',;' ' ,each nms #~ (<0)=val return.
 end.
+typval=. (#typ);typ;(#&>val);;val
 'rc sh tail'=. prepare sel
 if. rc do. throw '' return. end.
-sqlite3_exec_values sh;rws;(#typ);typ;(#&>val);;val
-sqlite3_finalize <sh
-rws
+if. 'select ' -: 7 {. sel do.
+  readvalues sqlite3_select_values sh;(,2);typval
+else.
+  sqlite3_exec_values sh;rws;typval
+end.
 )
 fixparm=: 4 : 0
 if. (x=0) +. 1 < #$y do. 0 return. end.
@@ -430,6 +440,14 @@ end.
 
 nms;<dat
 )
+parmtype=: 3 : 0
+t=. 3!:0 y
+if. t e. 1 4 do. SQLITE_INTEGER
+elseif. t=8 do. SQLITE_FLOAT
+elseif. t e. 2 32 do. (({.a.) e. ;y) pick SQLITE_TEXT;SQLITE_BLOB
+elseif. do. throw 'unsupported datatype: ',":t
+end.
+)
 writeargs=: 3 : 0
 'tab nms dat'=. y
 
@@ -448,7 +466,10 @@ sqlread=: 3 : 0
 sel=. fixselect y
 'rc sh tail'=. prepare sel
 if. rc do. throw '' return. end.
-'rc j res'=. sqlite3_read_values sh;,2
+readvalues sqlite3_read_values sh;,2
+)
+readvalues=: 3 : 0
+'rc sh res'=. 3 {. y
 assert. rc = SQLITE_DONE
 SZI=. IF64{4 8
 'buf typ nms len rws cls'=. memr res, 0 6 4

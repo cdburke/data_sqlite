@@ -3,7 +3,13 @@ NB. parm
 NB. =========================================================
 NB.*sqlparm v execute sql parameterized sql script
 sqlparm=: 3 : 0
-'sel typ dat'=. y
+if. 2=#y do.
+  'sel dat'=. y
+  typ=. parmtype &> boxxopen dat
+else.
+  'sel typ dat'=. y
+end.
+typ=. ,typ
 nms=. ('item',":) each i.#typ
 'nms dat'=. parmargs nms;<dat
 execparm sel;nms;typ;<dat
@@ -18,11 +24,14 @@ val=. typ fixparm each dat
 if. (<0) e. val do.
   throw 'invalid data for',;' ' ,each nms #~ (<0)=val return.
 end.
+typval=. (#typ);typ;(#&>val);;val
 'rc sh tail'=. prepare sel
 if. rc do. throw '' return. end.
-sqlite3_exec_values sh;rws;(#typ);typ;(#&>val);;val
-sqlite3_finalize <sh
-rws
+if. 'select ' -: 7 {. sel do.
+  readvalues sqlite3_select_values sh;(,2);typval
+else.
+  sqlite3_exec_values sh;rws;typval
+end.
 )
 
 NB. =========================================================
@@ -65,6 +74,17 @@ if. 0 e. rws = len do.
 end.
 
 nms;<dat
+)
+
+NB. =========================================================
+NB. get type for single data parameter
+parmtype=: 3 : 0
+t=. 3!:0 y
+if. t e. 1 4 do. SQLITE_INTEGER
+elseif. t=8 do. SQLITE_FLOAT
+elseif. t e. 2 32 do. (({.a.) e. ;y) pick SQLITE_TEXT;SQLITE_BLOB
+elseif. do. throw 'unsupported datatype: ',":t
+end.
 )
 
 NB. =========================================================
