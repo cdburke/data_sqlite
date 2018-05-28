@@ -12,7 +12,9 @@ end.
 typ=. ,typ
 nms=. ('item',":) each i.#typ
 'nms dat'=. parmargs nms;<dat
+if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
 execparm sel;nms;typ;<dat
+if. autocommit do. sqlcmd 'commit;' end.
 )
 
 NB. =========================================================

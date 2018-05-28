@@ -25,6 +25,7 @@ sqlite3_exec=: (lib, ' sqlite3_exec > ',(IFWIN#'+'),' i x *c x x *x' ) &cd
 sqlite3_extended_result_codes=: (lib, ' sqlite3_extended_result_codes > ',(IFWIN#'+'),' i x i' ) &cd
 sqlite3_finalize=: (lib, ' sqlite3_finalize > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_free=: (lib, ' sqlite3_free > ',(IFWIN#'+'),' i x' ) &cd
+sqlite3_get_autocommit=: (lib, ' sqlite3_get_autocommit > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_last_insert_rowid=: (lib, ' sqlite3_last_insert_rowid > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_libversion=: (lib, ' sqlite3_libversion > ',(IFWIN#'+'),' x' ) &cd
 sqlite3_prepare_v2=: (lib, ' sqlite3_prepare_v2   ',(IFWIN#'+'),' i x *c i *x *x' ) &cd

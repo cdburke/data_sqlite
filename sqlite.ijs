@@ -262,6 +262,7 @@ sqlite3_exec=: (lib, ' sqlite3_exec > ',(IFWIN#'+'),' i x *c x x *x' ) &cd
 sqlite3_extended_result_codes=: (lib, ' sqlite3_extended_result_codes > ',(IFWIN#'+'),' i x i' ) &cd
 sqlite3_finalize=: (lib, ' sqlite3_finalize > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_free=: (lib, ' sqlite3_free > ',(IFWIN#'+'),' i x' ) &cd
+sqlite3_get_autocommit=: (lib, ' sqlite3_get_autocommit > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_last_insert_rowid=: (lib, ' sqlite3_last_insert_rowid > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_libversion=: (lib, ' sqlite3_libversion > ',(IFWIN#'+'),' x' ) &cd
 sqlite3_prepare_v2=: (lib, ' sqlite3_prepare_v2   ',(IFWIN#'+'),' i x *c i *x *x' ) &cd
@@ -289,9 +290,9 @@ if. 0 -: args=. writeargs y do. 0 return. end.
 'tab nms typ dat'=. args
 sel=. }. (+:#nms) $ ',?'
 sel=. 'insert into ',tab,' ',(listvalues nms),' values(',sel,')'
-sqlcmd 'begin;'
+if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
 r=. execparm sel;nms;typ;<dat
-sqlcmd 'commit;'
+if. autocommit do. sqlcmd 'commit;' end.
 r
 )
 sqllastrowid=: 3 : 0
@@ -390,7 +391,9 @@ end.
 typ=. ,typ
 nms=. ('item',":) each i.#typ
 'nms dat'=. parmargs nms;<dat
+if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
 execparm sel;nms;typ;<dat
+if. autocommit do. sqlcmd 'commit;' end.
 )
 execparm=: 3 : 0
 'sel nms typ dat'=. y
@@ -621,9 +624,9 @@ if. 0 -: args=. writeargs tab;nms;<dat do. 0 return. end.
 whr=. ('where ' #~ -.'where ' -: 6 {. whr),whr
 set=. }:;nms ,each <'=?,'
 sel=. 'update ',tab,' set ',set,' ',whr
-sqlcmd 'begin;'
+if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
 r=. execparm sel;nms;typ;<dat
-sqlcmd 'commit;'
+if. autocommit do. sqlcmd 'commit;' end.
 r
 )
 sqlupsert=: 3 : 0
@@ -667,11 +670,11 @@ dat=. msk&# each dat
 cls=. #nms
 
 cmd=. 'update ',tab,' set ', (}: ; nms ,each <'=?,'),' where rowid='
-sqlcmd 'begin;'
+if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
 for_r. row do.
   execparm (cmd,":r);nms;typ;<r_index {each dat
 end.
-sqlcmd 'commit;'
+if. autocommit do. sqlcmd 'commit;' end.
 #row
 )
 checklibrary$0
