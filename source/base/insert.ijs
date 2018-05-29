@@ -13,10 +13,7 @@ if. 0 -: args=. writeargs y do. 0 return. end.
 'tab nms typ dat'=. args
 sel=. }. (+:#nms) $ ',?'
 sel=. 'insert into ',tab,' ',(listvalues nms),' values(',sel,')'
-if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
-r=. execparm sel;nms;typ;<dat
-if. autocommit do. sqlcmd 'commit;' end.
-r
+execparm sel;nms;typ;<dat
 )
 
 NB. =========================================================

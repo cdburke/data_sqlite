@@ -12,9 +12,7 @@ end.
 typ=. ,typ
 nms=. ('item',":) each i.#typ
 'nms dat'=. parmargs nms;<dat
-if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
 execparm sel;nms;typ;<dat
-if. autocommit do. sqlcmd 'commit;' end.
 )
 
 NB. =========================================================
@@ -27,12 +25,11 @@ if. (<0) e. val do.
   throw 'invalid data for',;' ' ,each nms #~ (<0)=val return.
 end.
 typval=. (#typ);typ;(#&>val);;val
-'rc sh tail'=. prepare sel
-if. rc do. throw '' return. end.
 if. 'select ' -: 7 {. sel do.
-  readvalues sqlite3_select_values sh;(,2);typval
+  readvalues sqlite3_select_values CH;sel;(,2);typval
 else.
-  sqlite3_exec_values sh;rws;typval
+  rc=. sqlite3_exec_values CH;sel;rws;typval
+  if. rc do. throw '' end.
 end.
 )
 

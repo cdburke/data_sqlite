@@ -52,10 +52,8 @@ dat=. msk&# each dat
 cls=. #nms
 
 cmd=. 'update ',tab,' set ', (}: ; nms ,each <'=?,'),' where rowid='
-if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
 for_r. row do.
   execparm (cmd,":r);nms;typ;<r_index {each dat
 end.
-if. autocommit do. sqlcmd 'commit;' end.
 #row
 )

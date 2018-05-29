@@ -126,22 +126,6 @@ end.
 )
 
 NB. =========================================================
-prepare=: 3 : 0
-stmt=. ,_1
-tail=. ,_1
-if. SQLITE_OK = rc=. >@{. cdrc=. sqlite3_prepare_v2 CH;(strlen y),stmt;tail do.
-  'stmt tail'=. 4 5{cdrc
-  if. tail e. 0 _1 do.
-    rc;({.stmt);''
-  else.
-    rc;({.stmt);memr tail,0 _1
-  end.
-else.
-  rc;_1;''
-end.
-)
-
-NB. =========================================================
 shellcmd=: 3 : 0
 if. IFUNIX do.
   hostcmd_j_ y

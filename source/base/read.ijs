@@ -5,15 +5,13 @@ NB. read as pair: column names ; column data
 NB. with column data in lists
 sqlread=: 3 : 0
 sel=. fixselect y
-'rc sh tail'=. prepare sel
-if. rc do. throw '' return. end.
-readvalues sqlite3_read_values sh;,2
+readvalues sqlite3_read_values CH;sel;,2
 )
 
 NB. =========================================================
 readvalues=: 3 : 0
-'rc sh res'=. 3 {. y
-assert. rc = SQLITE_DONE
+'rc res'=. 0 3 { y
+if. rc ~: SQLITE_DONE do. throw'' return. end.
 SZI=. IF64{4 8
 'buf typ nms len rws cls'=. memr res, 0 6 4
 colnames=. <;._2 memr nms,0,len
@@ -48,7 +46,6 @@ for_p. pointers do.
   end.
   data=. data,<val
 end.
-sqlite3_finalize <sh
 sqlite3_free_values <res
 colnames;<data
 )

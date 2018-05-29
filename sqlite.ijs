@@ -130,20 +130,6 @@ else.
 end.
 '(',r,')'
 )
-prepare=: 3 : 0
-stmt=. ,_1
-tail=. ,_1
-if. SQLITE_OK = rc=. >@{. cdrc=. sqlite3_prepare_v2 CH;(strlen y),stmt;tail do.
-  'stmt tail'=. 4 5{cdrc
-  if. tail e. 0 _1 do.
-    rc;({.stmt);''
-  else.
-    rc;({.stmt);memr tail,0 _1
-  end.
-else.
-  rc;_1;''
-end.
-)
 shellcmd=: 3 : 0
 if. IFUNIX do.
   hostcmd_j_ y
@@ -188,25 +174,26 @@ else.
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
 end.
 )
-libreq=: '1.06'
+binreq=: 106
+relreq=: 807
 checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
 end.
-fix=. 100 * 0 ". ]
 if. -. fexist libsqlite do.
-  msg=. 'The sqlite binary has not yet been installed.',LF2,'To install, '
-elseif. (fix libreq) > fix sqlite_extversion'' do.
-  msg=. 'The sqlite binary is out of date.',LF2,'To get the latest, '
-elseif. do. EMPTY return. end.
-msg=. msg,' run the getbin_psqlite_'''' line written to the session.'
-smoutput '   getbin_psqlite_'''''
-sminfo 'Sqlite';msg
+  getbinmsg 'The data/sqlite binary has not yet been installed.',LF2,'To install, ' return.
+end.
+extver=. 100 * 0 ". sqlite_extversion''
+if. binreq = extver do. return. end.
+if. binreq > extver do.
+  getbinmsg 'The data/sqlite binary is out of date.',LF2,'To get the latest, ' return.
+end.
+sminfo 'Sqlite';'The data/sqlite addon is out of date. Please install the latest version.' return.
 )
 getbin=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do. return. end.
 require 'pacman'
-path=. 'http://www.jsoftware.com/download/sqlitebin/',(":100 * 0 ". libreq),'/'
+path=. 'http://www.jsoftware.com/download/sqlitebin/',(":relreq),'/'
 arg=. HTTPCMD_jpacman_
 tm=. TIMEOUT_jpacman_
 dq=. dquote_jpacman_ f.
@@ -243,6 +230,11 @@ else.
   smoutput 'Sqlite binary installed.'
 end.
 )
+getbinmsg=: 3 : 0
+msg=. y,' run the getbin_psqlite_'''' line written to the session.'
+smoutput '   getbin_psqlite_'''''
+sminfo 'Sqlite';msg
+)
 SQLITE_OK=: 0
 SQLITE_DONE=: 101
 SQLITE_OPEN_READONLY=: 16b00000001
@@ -260,19 +252,16 @@ sqlite3_errcode=: (lib, ' sqlite3_errcode > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_errmsg=: (lib, ' sqlite3_errmsg > ',(IFWIN#'+'),' x x' ) &cd
 sqlite3_exec=: (lib, ' sqlite3_exec > ',(IFWIN#'+'),' i x *c x x *x' ) &cd
 sqlite3_extended_result_codes=: (lib, ' sqlite3_extended_result_codes > ',(IFWIN#'+'),' i x i' ) &cd
-sqlite3_finalize=: (lib, ' sqlite3_finalize > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_free=: (lib, ' sqlite3_free > ',(IFWIN#'+'),' i x' ) &cd
-sqlite3_get_autocommit=: (lib, ' sqlite3_get_autocommit > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_last_insert_rowid=: (lib, ' sqlite3_last_insert_rowid > ',(IFWIN#'+'),' i x' ) &cd
 sqlite3_libversion=: (lib, ' sqlite3_libversion > ',(IFWIN#'+'),' x' ) &cd
-sqlite3_prepare_v2=: (lib, ' sqlite3_prepare_v2   ',(IFWIN#'+'),' i x *c i *x *x' ) &cd
 sqlite3_sourceid=: (lib, ' sqlite3_sourceid > ',(IFWIN#'+'),' x' ) &cd
 sqlite3_extopen=: (lib, ' sqlite3_extopen ',(IFWIN#'+'),' i *c *x i x d *c *c' ) &cd
 sqlite3_extversion=: (lib, ' sqlite3_extversion > ',(IFWIN#'+'),' x') &cd
-sqlite3_exec_values=: (lib, ' sqlite3_exec_values ',(IFWIN#'+'),' i x i i *i *i *c') &cd
+sqlite3_exec_values=: (lib, ' sqlite3_exec_values > ',(IFWIN#'+'),' i x *c i i *i *i *c') &cd
 sqlite3_free_values=: (lib, ' sqlite3_free_values > ',(IFWIN#'+'),' i *') &cd
-sqlite3_read_values=: (lib, ' sqlite3_read_values ',(IFWIN#'+'),' i x *') &cd
-sqlite3_select_values=: (lib, ' sqlite3_select_values ',(IFWIN#'+'),' i x * i *i *i *c') &cd
+sqlite3_read_values=: (lib, ' sqlite3_read_values ',(IFWIN#'+'),' i x *c *') &cd
+sqlite3_select_values=: (lib, ' sqlite3_select_values ',(IFWIN#'+'),' i x *c * i *i *i *c') &cd
 sqlite_extversion=: 3 : 0
 try.
   ":0.01*sqlite3_extversion''
@@ -290,10 +279,7 @@ if. 0 -: args=. writeargs y do. 0 return. end.
 'tab nms typ dat'=. args
 sel=. }. (+:#nms) $ ',?'
 sel=. 'insert into ',tab,' ',(listvalues nms),' values(',sel,')'
-if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
-r=. execparm sel;nms;typ;<dat
-if. autocommit do. sqlcmd 'commit;' end.
-r
+execparm sel;nms;typ;<dat
 )
 sqllastrowid=: 3 : 0
 sqlite3_last_insert_rowid CH
@@ -306,14 +292,12 @@ rc=. sqlite3_exec CH;y;0;0;,0
 if. rc do. throw '' end.
 )
 sqlcolinfo=: 3 : 0
-'rc sh tail'=. prepare 'select * from ',y,' limit 0'
-if. rc do. throw '' return. end.
-'rc j res'=. sqlite3_read_values sh;,2
-assert. rc = SQLITE_DONE
+sel=. 'select * from ',y,' limit 0'
+'rc res'=. 0 3 { sqlite3_read_values CH;sel;,2
+if. rc ~: SQLITE_DONE do. throw'' return. end.
 'j typ nms len j cls'=. memr res, 0 6 4
 names=. <;._2 memr nms,0,len
 types=. memr typ,0,cls,4
-sqlite3_finalize <sh
 sqlite3_free_values <res
 names;types
 )
@@ -391,9 +375,7 @@ end.
 typ=. ,typ
 nms=. ('item',":) each i.#typ
 'nms dat'=. parmargs nms;<dat
-if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
 execparm sel;nms;typ;<dat
-if. autocommit do. sqlcmd 'commit;' end.
 )
 execparm=: 3 : 0
 'sel nms typ dat'=. y
@@ -403,12 +385,11 @@ if. (<0) e. val do.
   throw 'invalid data for',;' ' ,each nms #~ (<0)=val return.
 end.
 typval=. (#typ);typ;(#&>val);;val
-'rc sh tail'=. prepare sel
-if. rc do. throw '' return. end.
 if. 'select ' -: 7 {. sel do.
-  readvalues sqlite3_select_values sh;(,2);typval
+  readvalues sqlite3_select_values CH;sel;(,2);typval
 else.
-  sqlite3_exec_values sh;rws;typval
+  rc=. sqlite3_exec_values CH;sel;rws;typval
+  if. rc do. throw '' end.
 end.
 )
 fixparm=: 4 : 0
@@ -467,13 +448,11 @@ tab;nms;typ;<dat
 )
 sqlread=: 3 : 0
 sel=. fixselect y
-'rc sh tail'=. prepare sel
-if. rc do. throw '' return. end.
-readvalues sqlite3_read_values sh;,2
+readvalues sqlite3_read_values CH;sel;,2
 )
 readvalues=: 3 : 0
-'rc sh res'=. 3 {. y
-assert. rc = SQLITE_DONE
+'rc res'=. 0 3 { y
+if. rc ~: SQLITE_DONE do. throw'' return. end.
 SZI=. IF64{4 8
 'buf typ nms len rws cls'=. memr res, 0 6 4
 colnames=. <;._2 memr nms,0,len
@@ -507,7 +486,6 @@ for_p. pointers do.
   end.
   data=. data,<val
 end.
-sqlite3_finalize <sh
 sqlite3_free_values <res
 colnames;<data
 )
@@ -624,10 +602,7 @@ if. 0 -: args=. writeargs tab;nms;<dat do. 0 return. end.
 whr=. ('where ' #~ -.'where ' -: 6 {. whr),whr
 set=. }:;nms ,each <'=?,'
 sel=. 'update ',tab,' set ',set,' ',whr
-if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
-r=. execparm sel;nms;typ;<dat
-if. autocommit do. sqlcmd 'commit;' end.
-r
+execparm sel;nms;typ;<dat
 )
 sqlupsert=: 3 : 0
 'tab keys nms dat'=. y
@@ -670,11 +645,9 @@ dat=. msk&# each dat
 cls=. #nms
 
 cmd=. 'update ',tab,' set ', (}: ; nms ,each <'=?,'),' where rowid='
-if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
 for_r. row do.
   execparm (cmd,":r);nms;typ;<r_index {each dat
 end.
-if. autocommit do. sqlcmd 'commit;' end.
 #row
 )
 checklibrary$0

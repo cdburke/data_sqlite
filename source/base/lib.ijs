@@ -13,23 +13,24 @@ end.
 )
 
 NB. =========================================================
-NB. minimum required binary version:
-libreq=: '1.06'
+NB. required versions:
+binreq=: 106 NB. binary
+relreq=: 807 NB. J release
 
 NB. =========================================================
 checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
 end.
-fix=. 100 * 0 ". ]
 if. -. fexist libsqlite do.
-  msg=. 'The sqlite binary has not yet been installed.',LF2,'To install, '
-elseif. (fix libreq) > fix sqlite_extversion'' do.
-  msg=. 'The sqlite binary is out of date.',LF2,'To get the latest, '
-elseif. do. EMPTY return. end.
-msg=. msg,' run the getbin_psqlite_'''' line written to the session.'
-smoutput '   getbin_psqlite_'''''
-sminfo 'Sqlite';msg
+  getbinmsg 'The data/sqlite binary has not yet been installed.',LF2,'To install, ' return.
+end.
+extver=. 100 * 0 ". sqlite_extversion''
+if. binreq = extver do. return. end.
+if. binreq > extver do.
+  getbinmsg 'The data/sqlite binary is out of date.',LF2,'To get the latest, ' return.
+end.
+sminfo 'Sqlite';'The data/sqlite addon is out of date. Please install the latest version.' return.
 )
 
 NB. =========================================================
@@ -38,7 +39,7 @@ NB. uses routines from pacman
 getbin=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do. return. end.
 require 'pacman'
-path=. 'http://www.jsoftware.com/download/sqlitebin/',(":100 * 0 ". libreq),'/'
+path=. 'http://www.jsoftware.com/download/sqlitebin/',(":relreq),'/'
 arg=. HTTPCMD_jpacman_
 tm=. TIMEOUT_jpacman_
 dq=. dquote_jpacman_ f.
@@ -74,4 +75,11 @@ else.
   ferase lg
   smoutput 'Sqlite binary installed.'
 end.
+)
+
+NB. =========================================================
+getbinmsg=: 3 : 0
+msg=. y,' run the getbin_psqlite_'''' line written to the session.'
+smoutput '   getbin_psqlite_'''''
+sminfo 'Sqlite';msg
 )

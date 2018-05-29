@@ -15,8 +15,5 @@ if. 0 -: args=. writeargs tab;nms;<dat do. 0 return. end.
 whr=. ('where ' #~ -.'where ' -: 6 {. whr),whr
 set=. }:;nms ,each <'=?,'
 sel=. 'update ',tab,' set ',set,' ',whr
-if. autocommit=. sqlite3_get_autocommit CH do. sqlcmd 'begin;' end.
-r=. execparm sel;nms;typ;<dat
-if. autocommit do. sqlcmd 'commit;' end.
-r
+execparm sel;nms;typ;<dat
 )

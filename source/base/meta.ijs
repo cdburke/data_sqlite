@@ -16,14 +16,12 @@ if. rc do. throw '' end.
 NB. =========================================================
 NB. sqlcolinfo v column names and affinity types
 sqlcolinfo=: 3 : 0
-'rc sh tail'=. prepare 'select * from ',y,' limit 0'
-if. rc do. throw '' return. end.
-'rc j res'=. sqlite3_read_values sh;,2
-assert. rc = SQLITE_DONE
+sel=. 'select * from ',y,' limit 0'
+'rc res'=. 0 3 { sqlite3_read_values CH;sel;,2
+if. rc ~: SQLITE_DONE do. throw'' return. end.
 'j typ nms len j cls'=. memr res, 0 6 4
 names=. <;._2 memr nms,0,len
 types=. memr typ,0,cls,4
-sqlite3_finalize <sh
 sqlite3_free_values <res
 names;types
 )
