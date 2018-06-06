@@ -5,7 +5,8 @@ NB. library:
 3 : 0''
 if. UNAME-:'Android' do.
   arch=. LF-.~ 2!:0'getprop ro.product.cpu.abi'
-  libsqlite=: (jpath'~bin/../libexec/android-libs/',arch,'/libjsqlite3.so')
+  2!:0 'mkdir -p ', jpath'~bin/../libexec/',arch
+  libsqlite=: (jpath'~bin/../libexec/',arch,'/libjsqlite3.so')
 else.
   ext=. (('Darwin';'Linux') i. <UNAME) pick ;:'dylib so dll'
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
