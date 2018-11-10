@@ -161,7 +161,7 @@ else.
   end.
   LastError=: 'sqlite rc=',(":s),' ',msg
 end.
-if. Debug do. wdinfo LastError end.
+if. Debug do. sminfo LastError end.
 throw.
 )
 xeach=: 1 : (':';'(u each x{y) x}y')
@@ -410,7 +410,6 @@ parmargs=: 3 : 0
 'nms dat'=. y
 
 nms=. ,each boxxopen nms
-if. 0=#nms do. 0 return. end.
 
 if. 0 e. $dat do. 0 return. end.
 dat=. boxxopen dat
@@ -440,7 +439,10 @@ if. 0=args=. parmargs nms;<dat do. 0 return. end.
 'nms dat'=. args
 
 'names types'=. sqlcolinfo tab
-if. 0 e. nms e. names do.
+
+if. 0=#nms do.
+  nms=. names
+elseif. 0 e. nms e. names do.
   throw 'column not found:',; ' ' ,each nms -. names return.
 end.
 typ=. (names i. nms) { types
@@ -499,6 +501,18 @@ if. 1 = #>{.dat do.
   dat=. 0 pick each dat
 end.
 cls,.dat
+)
+sqlends=: 3 : 0
+5 sqlends y
+:
+'cls dat'=. <"1 x sqlhead y
+cls,:dat ,each 1{x sqltail y
+)
+sqlendsx=: 3 : 0
+5 sqlendsx y
+:
+'cls dat'=. <"1 x sqlheadx y
+cls,:dat ,each 1{x sqltailx y
 )
 sqlexec=: 3 : 0
 r=. 1 pick sqlread y
@@ -570,7 +584,7 @@ sqltailx=: 3 : 0
 :
 if. x-:0 do. sqlreadx y return. end.
 'frm tab whr ord'=. splitselect fixselect y
-sqlreadx frm,tab,' where rowid in ',listvalues getlastrows x;tab;whr
+sqlreadsx frm,tab,' where rowid in ',listvalues getlastrows x;tab;whr
 )
 sqlite3do=: 3 : 0
 'db cmd'=. y

@@ -65,6 +65,22 @@ cls,.dat
 )
 
 NB. =========================================================
+sqlends=: 3 : 0
+5 sqlends y
+:
+'cls dat'=. <"1 x sqlhead y
+cls,:dat ,each 1{x sqltail y
+)
+
+NB. =========================================================
+sqlendsx=: 3 : 0
+5 sqlendsx y
+:
+'cls dat'=. <"1 x sqlheadx y
+cls,:dat ,each 1{x sqltailx y
+)
+
+NB. =========================================================
 sqlexec=: 3 : 0
 r=. 1 pick sqlread y
 if. 1=#r do.
@@ -156,5 +172,5 @@ sqltailx=: 3 : 0
 :
 if. x-:0 do. sqlreadx y return. end.
 'frm tab whr ord'=. splitselect fixselect y
-sqlreadx frm,tab,' where rowid in ',listvalues getlastrows x;tab;whr
+sqlreadsx frm,tab,' where rowid in ',listvalues getlastrows x;tab;whr
 )

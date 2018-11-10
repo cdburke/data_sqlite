@@ -59,7 +59,6 @@ parmargs=: 3 : 0
 'nms dat'=. y
 
 nms=. ,each boxxopen nms
-if. 0=#nms do. 0 return. end.
 
 if. 0 e. $dat do. 0 return. end.
 dat=. boxxopen dat
@@ -97,7 +96,10 @@ if. 0=args=. parmargs nms;<dat do. 0 return. end.
 'nms dat'=. args
 
 'names types'=. sqlcolinfo tab
-if. 0 e. nms e. names do.
+
+if. 0=#nms do.
+  nms=. names
+elseif. 0 e. nms e. names do.
   throw 'column not found:',; ' ' ,each nms -. names return.
 end.
 typ=. (names i. nms) { types

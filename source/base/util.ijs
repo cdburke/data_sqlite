@@ -167,7 +167,7 @@ else.
   end.
   LastError=: 'sqlite rc=',(":s),' ',msg
 end.
-if. Debug do. wdinfo LastError end.
+if. Debug do. sminfo LastError end.
 throw.
 )
 
