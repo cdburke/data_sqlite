@@ -72,6 +72,8 @@ f=. 3 : 0
 )
 
 0!:100 ; f each cutopen 0 : 0
+ends
+endsx
 head
 headx
 rand

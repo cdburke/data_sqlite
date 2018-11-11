@@ -65,20 +65,16 @@ cls,.dat
 )
 
 NB. =========================================================
-sqlends=: 3 : 0
-5 sqlends y
-:
-'cls dat'=. <"1 x sqlhead y
-cls,:dat ,each 1{x sqltail y
-)
-
-NB. =========================================================
 sqlendsx=: 3 : 0
 5 sqlendsx y
 :
 'cls dat'=. <"1 x sqlheadx y
-cls,:dat ,each 1{x sqltailx y
+ext=. 1{x sqltailx y
+msk=. -. (0 pick ext) e. 0 pick dat
+cls,:dat ,each msk&# each ext
 )
+
+sqlends=: }."1 @: sqlendsx
 
 NB. =========================================================
 sqlexec=: 3 : 0
