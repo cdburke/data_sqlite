@@ -16,7 +16,7 @@ end.
 NB. =========================================================
 NB. required versions:
 binreq=: 107 NB. binary
-relreq=: 807 NB. J release
+relreq=: 901 NB. J release
 
 NB. =========================================================
 checklibrary=: 3 : 0

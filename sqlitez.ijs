@@ -14,11 +14,11 @@ dbnextseq=: 3 : 0
 dbstate=: 3 : 0
 (,': ',":@dbsize) &> (y-:1) pick (dbtables'');<dbviews''
 )
-f=. 3 : 0
+sql3fns=. 3 : 0
 'db',y,'_z_=:3 : ''sql',y,'__locDB y''',LF
 )
 
-0!:100 ; f each cutopen 0 : 0
+0!:100 ; sql3fns each cutopen 0 : 0
 cmd
 cols
 debug
@@ -47,11 +47,11 @@ update
 upsert
 views
 )
-f=. 3 : 0
+sql3fns=. 3 : 0
 'db',y,'_z_=:3 : (''sql',y,'__locDB y'';'':'';''x sql',y,'__locDB y'')',LF
 )
 
-0!:100 ; f each cutopen 0 : 0
+0!:100 ; sql3fns each cutopen 0 : 0
 ends
 endsx
 head
@@ -61,6 +61,6 @@ randx
 tail
 tailx
 )
-a=. 'SQLITE_'&, each ;:'INTEGER FLOAT TEXT BLOB'
-". &> a ,each '_z_=: '&, each a ,each <'_psqlite_'
+sql3nouns=. 'SQLITE_'&, each ;:'INTEGER FLOAT TEXT BLOB'
+". &> sql3nouns ,each '_z_=: '&, each sql3nouns ,each <'_psqlite_'
 cocurrent 'base'

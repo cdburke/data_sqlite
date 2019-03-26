@@ -176,7 +176,7 @@ else.
 end.
 )
 binreq=: 107
-relreq=: 807
+relreq=: 901
 checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.

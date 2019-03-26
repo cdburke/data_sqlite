@@ -31,11 +31,11 @@ dbstate=: 3 : 0
 NB. =========================================================
 NB. other db cover functions
 NB. monadic:
-f=. 3 : 0
+sql3fns=. 3 : 0
 'db',y,'_z_=:3 : ''sql',y,'__locDB y''',LF
 )
 
-0!:100 ; f each cutopen 0 : 0
+0!:100 ; sql3fns each cutopen 0 : 0
 cmd
 cols
 debug
@@ -67,11 +67,11 @@ views
 
 NB. ---------------------------------------------------------
 NB. dyadic:
-f=. 3 : 0
+sql3fns=. 3 : 0
 'db',y,'_z_=:3 : (''sql',y,'__locDB y'';'':'';''x sql',y,'__locDB y'')',LF
 )
 
-0!:100 ; f each cutopen 0 : 0
+0!:100 ; sql3fns each cutopen 0 : 0
 ends
 endsx
 head
@@ -84,8 +84,8 @@ tailx
 
 NB. ---------------------------------------------------------
 NB. nouns
-a=. 'SQLITE_'&, each ;:'INTEGER FLOAT TEXT BLOB'
-". &> a ,each '_z_=: '&, each a ,each <'_psqlite_'
+sql3nouns=. 'SQLITE_'&, each ;:'INTEGER FLOAT TEXT BLOB'
+". &> sql3nouns ,each '_z_=: '&, each sql3nouns ,each <'_psqlite_'
 
 NB. =========================================================
 cocurrent 'base'
