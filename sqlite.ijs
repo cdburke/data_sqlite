@@ -175,8 +175,8 @@ else.
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
 end.
 )
-binreq=: 107
-relreq=: 807
+binreq=: 108
+relreq=: 901
 checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
@@ -185,7 +185,7 @@ if. -. fexist libsqlite do.
   getbinmsg 'The data/sqlite binary has not yet been installed.',LF2,'To install, ' return.
 end.
 extver=. 100 * 0 ". sqlite_extversion''
-if. binreq <: extver do. return. end.
+if. binreq = extver do. return. end.
 if. binreq > extver do.
   getbinmsg 'The data/sqlite binary is out of date.',LF2,'To get the latest, ' return.
 end.

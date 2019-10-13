@@ -15,8 +15,8 @@ end.
 
 NB. =========================================================
 NB. required versions:
-binreq=: 107 NB. binary
-relreq=: 807 NB. J release
+binreq=: 108 NB. binary
+relreq=: 901 NB. J release
 
 NB. =========================================================
 checklibrary=: 3 : 0
@@ -27,7 +27,7 @@ if. -. fexist libsqlite do.
   getbinmsg 'The data/sqlite binary has not yet been installed.',LF2,'To install, ' return.
 end.
 extver=. 100 * 0 ". sqlite_extversion''
-if. binreq <: extver do. return. end.
+if. binreq = extver do. return. end.
 if. binreq > extver do.
   getbinmsg 'The data/sqlite binary is out of date.',LF2,'To get the latest, ' return.
 end.
