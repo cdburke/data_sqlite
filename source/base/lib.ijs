@@ -5,6 +5,11 @@ NB. library:
 3 : 0''
 if. UNAME-:'Android' do.
   arch=. LF-.~ 2!:0'getprop ro.product.cpu.abi'
+  if. IF64 < arch-:'arm64-v8a' do.
+    arch=. 'armeabi-v7a'
+  elseif. IF64 < arch-:'x86_64' do.
+    arch=. 'x86'
+  end.
   2!:0 'mkdir -p ', jpath'~bin/../libexec/',arch
   libsqlite=: (jpath'~bin/../libexec/',arch,'/libjsqlite3.so')
 else.
@@ -47,6 +52,11 @@ dq=. dquote_jpacman_ f.
 to=. libsqlite_psqlite_
 if. UNAME-:'Android' do.
   arch=. LF-.~ 2!:0'getprop ro.product.cpu.abi'
+  if. IF64 < arch-:'arm64-v8a' do.
+    arch=. 'armeabi-v7a'
+  elseif. IF64 < arch-:'x86_64' do.
+    arch=. 'x86'
+  end.
   fm=. path,'android/libs/',z=. arch,'/libjsqlite3.so'
   'res p'=. httpget_jpacman_ fm
   if. res do.
