@@ -70,6 +70,7 @@ fixselect=: 3 : 0
 sel=. fixselect1 y
 if. -. '.' e. sel do. return. end.
 if. 'pragma' -: 6 {. sel do. return. end.
+if. -. '"' e. sel do. return. end.
 b=. (sel e. ' ,<>!=') > ~:/\sel='"'
 t=. (1,b) <;.1 ' ',sel
 m=. I. ('.' e. &> t) > '"' e.&> t
