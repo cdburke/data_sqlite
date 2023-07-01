@@ -177,14 +177,14 @@ if. UNAME-:'Android' do.
   2!:0 'mkdir -p ', jpath'~bin/../libexec/',arch
   libsqlite=: (jpath'~bin/../libexec/',arch,'/libjsqlite3.so')
 else.
-  ext=. (('Darwin';'Linux') i. <UNAME) pick ;:'dylib so dll'
+  ext=. (('Darwin';'Win') i. <UNAME) pick ;:'dylib dll so'
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
 end.
 )
 binreq=: 108
 relreq=: 901
 checklibrary=: 3 : 0
-if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do.
+if. ((<UNAME) e.'Darwin';'Linux';'FreeBSD';'OpenBSD')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
 end.
 if. -. fexist libsqlite do.
@@ -198,7 +198,7 @@ end.
 sminfo 'Sqlite';'The data/sqlite addon is out of date. Please install the latest version.' return.
 )
 getbin=: 3 : 0
-if. ((<UNAME) e.'Darwin';'Linux')>IF64+.IFRASPI do. return. end.
+if. ((<UNAME) e.'Darwin';'Linux';'FreeBSD';'OpenBSD')>IF64+.IFRASPI do. return. end.
 require 'pacman'
 path=. 'http://www.jsoftware.com/download/sqlitebin/',(":relreq),'/'
 arg=. HTTPCMD_jpacman_
@@ -230,7 +230,7 @@ res=. ''
 fail=. 0
 try.
   fail=. _1-: res=. shellcmd cmd
-  2!:0 ::0:^:(UNAME-:'Linux') 'chmod 644 ', dquote to
+  2!:0 ::0:^:((<UNAME)e.'Linux';'FreeBSD';'OpenBSD') 'chmod 644 ', dquote to
 catch. fail=. 1 end.
 if. fail +. 0 >: fsize to do.
   if. _1-:msg=. freads lg do.
