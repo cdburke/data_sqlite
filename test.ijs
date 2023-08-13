@@ -1,6 +1,8 @@
-NB. some tests from wiki page https://code.jsoftware.com/wiki/Addons/data/sqlite/Basic_Usage
+NB. some tests from wiki pages https://code.jsoftware.com/wiki/Addons/data/sqlite
 
 load 'data/sqlite'
+sqlite_info_psqlite_''
+
 db=: sqlopen_psqlite_ '~addons/data/sqlite/db/sandp.db'
 
 sqltables__db''
