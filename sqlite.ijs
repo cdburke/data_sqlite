@@ -181,7 +181,7 @@ else.
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
 end.
 )
-binreq=: 108
+binreq=: 109
 relreq=: 901
 checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux';'FreeBSD';'OpenBSD')>IF64+.IFRASPI do.
