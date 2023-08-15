@@ -90,7 +90,8 @@ end.
 
 NB. =========================================================
 getbinmsg=: 3 : 0
-msg=. y,' run the getbin_psqlite_'''' line written to the session.'
+msg=. y,' run the getbin_psqlite_'''' line written to the session.',LF2
+msg=. msg,'You may need to restart J to get the new binary.'
 smoutput '   getbin_psqlite_'''''
 sminfo 'Sqlite';msg
 )
