@@ -8,6 +8,7 @@ DBS=: i.0 3  NB. handle;file;loc
 Debug=: 0
 LastError=: ''
 Timeout=: 60000
+BinInstalled=: 0 NB. if binary previously installed
 
 NB. datatypes for parameterized commands:
 SQLITE_INTEGER=: 1

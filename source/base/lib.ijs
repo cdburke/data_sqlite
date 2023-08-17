@@ -28,14 +28,10 @@ checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux';'FreeBSD';'OpenBSD')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
 end.
-if. -. fexist libsqlite do.
-  getbinmsg 'The data/sqlite binary has not yet been installed.',LF2,'To install, ' return.
-end.
+if. -. fexist libsqlite do. getbinmsg 0 end.
 extver=. 100 * 0 ". sqlite_extversion''
 if. binreq = extver do. return. end.
-if. binreq > extver do.
-  getbinmsg 'The data/sqlite binary is out of date.',LF2,'To get the latest, ' return.
-end.
+if. binreq > extver do. getbinmsg 1 return. end.
 sminfo 'Sqlite';'The data/sqlite addon is out of date. Please install the latest version.' return.
 )
 
@@ -44,6 +40,7 @@ NB. get sqlite binary
 NB. uses routines from pacman
 getbin=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux';'FreeBSD';'OpenBSD')>IF64+.IFRASPI do. return. end.
+if. BinInstalled do. cdf'' end.
 require 'pacman'
 path=. 'http://www.jsoftware.com/download/sqlitebin/',(":relreq),'/'
 arg=. HTTPCMD_jpacman_
@@ -90,8 +87,18 @@ end.
 
 NB. =========================================================
 getbinmsg=: 3 : 0
-msg=. y,' run the getbin_psqlite_'''' line written to the session.',LF2
-msg=. msg,'You may need to restart J to get the new binary.'
+run=. 'run the getbin_psqlite_'''' line written to the session.'
+if. y do.
+  msg=. 'The data/sqlite binary is out of date.'
+  msg=. msg,LF2,'To get the latest, ',run
+  msg=. msg,LF2,'Afterwards, please restart J.'
+else.
+  msg=. 'The data/sqlite binary has not yet been installed.',LF2,'To install, ',run
+end.
+NB.
+NB. msg=. y,' run the getbin_psqlite_'''' line written to the session.',LF2
+NB. msg=. msg,'If you are updating the binary, You may need to restart J to get the new binary.'
+BinInstalled=: y
 smoutput '   getbin_psqlite_'''''
 sminfo 'Sqlite';msg
 )
