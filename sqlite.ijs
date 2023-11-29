@@ -188,7 +188,7 @@ checklibrary=: 3 : 0
 if. ((<UNAME) e.'Darwin';'Linux';'FreeBSD';'OpenBSD')>IF64+.IFRASPI do.
   sminfo 'Sqlite';'The data/sqlite addon is for J64 only.' return.
 end.
-if. -. fexist libsqlite do. getbinmsg 0 end.
+if. -. fexist libsqlite do. getbinmsg 0 return. end.
 extver=. 100 * 0 ". sqlite_extversion''
 if. binreq = extver do. return. end.
 if. binreq > extver do. getbinmsg 1 return. end.
