@@ -14,7 +14,11 @@ if. UNAME-:'Android' do.
   libsqlite=: (jpath'~bin/../libexec/',arch,'/libjsqlite3.so')
 else.
   ext=. (('Darwin';'Win') i. <UNAME) pick ;:'dylib dll so'
-  libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
+  if. (<UNAME) e. 'FreeBSD';'OpenBSD' do.
+    libsqlite=: jpath '~addons/data/sqlite/lib/',(tolower UNAME),'/libjsqlite3',((-.IF64)#'_32'),'.',ext
+  else.
+    libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
+  end.
 end.
 )
 
