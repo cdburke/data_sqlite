@@ -14,11 +14,7 @@ if. UNAME-:'Android' do.
   libsqlite=: (jpath'~bin/../libexec/',arch,'/libjsqlite3.so')
 else.
   ext=. (('Darwin';'Win') i. <UNAME) pick ;:'dylib dll so'
-  if. (<UNAME) e. 'FreeBSD';'OpenBSD' do.
-    libsqlite=: jpath '~addons/data/sqlite/lib/',(tolower UNAME),'/libjsqlite3',((-.IF64)#'_32'),'.',ext
-  else.
-    libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
-  end.
+  libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
 end.
 )
 
@@ -47,6 +43,9 @@ if. ((<UNAME) e.'Darwin';'Linux';'FreeBSD';'OpenBSD')>IF64+.IFRASPI do. return. 
 if. BinInstalled do. cdf'' end.
 require 'pacman'
 path=. 'http://www.jsoftware.com/download/sqlitebin/',(":relreq),'/'
+if. (<UNAME) e. 'FreeBSD';'OpenBSD' do.
+  path=path, (tolower UNAME),(('arm64'-:9!:56'cpu')#'/arm64'),'/'
+end.
 arg=. HTTPCMD_jpacman_
 tm=. TIMEOUT_jpacman_
 dq=. dquote_jpacman_ f.
