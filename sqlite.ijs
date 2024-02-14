@@ -200,7 +200,7 @@ if. BinInstalled do. cdf'' end.
 require 'pacman'
 path=. 'http://www.jsoftware.com/download/sqlitebin/',(":relreq),'/'
 if. (<UNAME) e. 'FreeBSD';'OpenBSD' do.
-  path=path, (tolower UNAME),(('arm64'-:9!:56'cpu')#'/arm64'),'/'
+  path=. path, (tolower UNAME),(('arm64'-:9!:56'cpu')#'/arm64'),'/'
 end.
 arg=. HTTPCMD_jpacman_
 tm=. TIMEOUT_jpacman_
