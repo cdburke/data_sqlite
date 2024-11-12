@@ -180,6 +180,7 @@ if. UNAME-:'Android' do.
 else.
   ext=. (('Darwin';'Win') i. <UNAME) pick ;:'dylib dll so'
   libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3',((-.IF64)#'_32'),'.',ext
+  if. IFWIN*.'arm64'-:9!:56'cpu' do. libsqlite=: jpath '~addons/data/sqlite/lib/libjsqlite3_arm64','.',ext end.
 end.
 )
 binreq=: 109
